@@ -8,22 +8,13 @@
 # List of functions included in this file:
 #  Functions for the CRS test and confidence interval
 #   (1) random.G  : Get groups of transformations
-#	(2) CRS.test  : Computes randomization test for t-test
+#	  (2) CRS.test  : Computes randomization test for t-test
 #   (3) CRS.CI    : Computes confidence intervals by test inversion using bisection
 #  Functions for computing Clustered Standard Errors (used in applications)
-#   (3) cl            : Computes clustered standard errors (BCH and Stata)
-#   (4) cce.stata     : Computes clustered se (BCH and Stata). Faster than cl
-#   (5) cce.brl		  : Computes clustered se with Bias Reduced Linearization
+#   (3) cl        : Computes clustered standard errors (BCH and Stata)
+#   (4) cce.stata : Computes clustered se (BCH and Stata). Faster than cl
+#   (5) cce.brl		: Computes clustered se with Bias Reduced Linearization
 #-------------------------------------------------------------------
-# Required Libraries:
-require("plm");
-require("Matrix");
-require("data.table");
-require("compiler")
-require("MASS")
-require("VGAM")
-require(sandwich, quietly = TRUE)
-require(lmtest, quietly = TRUE)
 
 #------------------------------------------------------------------------
 #--- FUNCTIONS FOR THE RANDOMIZATION TEST -------------------------------
@@ -47,8 +38,6 @@ pre.random.G  <- function(q,B=10000){
       }
       return(perm)
     }
-    #-------------------------------------------------------------------
-    random.G <- cmpfun(pre.random.G);
 #-------------------------------------------------------------------
 
 #-------------------------------------------------------------------
@@ -96,8 +85,6 @@ pre.CRS.test  <- function(c.beta,G,lambda=0,alpha=0.05,nj=1){
         # List of returns
         list(rule=rule, Nrule=Nrule, cv=NewT[k], pv=p.value,pv2=p.value2)
      }
-    #-------------------------------------------------------------------
-    CRS.test = cmpfun(pre.CRS.test);
 #-------------------------------------------------------------------
 
 #-------------------------------------------------------------------
@@ -205,8 +192,6 @@ pre.cl <- function(dat,reg, cluster,dof="bch"){
     # then use the plm class "pool" with fuction cvovHC as follows.
     # dfc*vcovHC(pool, type = "HC0", cluster = "group", adjust="T")
     }
-    #-------------------------------------------------------------------
-    cl <- cmpfun(pre.cl);
 #-------------------------------------------------------------------
 
 #------------------------------------------------------------------
@@ -254,8 +239,6 @@ pre.cce.stata <- function(X,reg,cluster,dof="stata") {
         Vstata <- dfc*sandwich(reg,meat.=mymeat)
         return(Vstata)
     }
-    #-------------------------------------------------------------------
-    cce.stata <- cmpfun(pre.cce.stata)
 #-------------------------------------------------------------------
 
 #-------------------------------------------------------------------
@@ -380,8 +363,6 @@ pre.cce.brl <- function(X,reg,cluster,method="eigen") {
 
         return(list(Vlz2=Vlz2,Kbm=Kbm,Kik=Kik))
     }
-    #-------------------------------------------------------------------
-    cce.brl <- cmpfun(pre.cce.brl)
 #-------------------------------------------------------------------
 
 #-------------------------------------------------------------------
@@ -399,6 +380,4 @@ pre.cce.brl <- function(X,reg,cluster,method="eigen") {
         #negrootMss <- chol(solve(Mss),pivot=FALSE)
         return(InvrootM)
     }
-    #-------------------------------------------------------------------
-    InvSqrt <- cmpfun(pre.InvSqrt)
 #-------------------------------------------------------------------
