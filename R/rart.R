@@ -31,13 +31,13 @@ random.G <- function(q, B = 10000) {
 #' @param alpha significance level (dafault 0.05)
 #' @param nj q x 1 vector of sample sizes in each cluster (for alternative weighting)
 #'
-#' @return a list contating the following elements
-#' \itemize{
-#'  \item{"rule"}{binary decision of the test}
-#'  \item{"Nrule"}{binary decision of the non-randomized test}
-#'  \item{"cv"}{the critical value of the randomization test}
-#'  \item{"pv"}{p-value according to folmula 15.5}
-#'  \item{"pv2"}{p-value according to folmula 15.7}
+#' @return A list contating the following elements:
+#' \describe{
+#'  \item{`rule`}{binary decision of the test}
+#'  \item{`Nrule`}{binary decision of the non-randomized test}
+#'  \item{`cv`}{the critical value of the randomization test}
+#'  \item{`pv`}{p-value according to folmula 15.5}
+#'  \item{`pv2`}{p-value according to folmula 15.7}
 #' }
 CRS.test <- function(c.beta, G, lambda = 0, alpha = 0.05, nj = 1) {
   q = length(c.beta);

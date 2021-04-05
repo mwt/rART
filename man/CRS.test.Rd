@@ -18,13 +18,13 @@ CRS.test(c.beta, G, lambda = 0, alpha = 0.05, nj = 1)
 \item{nj}{q x 1 vector of sample sizes in each cluster (for alternative weighting)}
 }
 \value{
-a list contating the following elements
-\itemize{
- \item{"rule"}{binary decision of the test}
- \item{"Nrule"}{binary decision of the non-randomized test}
- \item{"cv"}{the critical value of the randomization test}
- \item{"pv"}{p-value according to folmula 15.5}
- \item{"pv2"}{p-value according to folmula 15.7}
+A list contating the following elements:
+\describe{
+ \item{`rule`}{binary decision of the test}
+ \item{`Nrule`}{binary decision of the non-randomized test}
+ \item{`cv`}{the critical value of the randomization test}
+ \item{`pv`}{p-value according to folmula 15.5}
+ \item{`pv2`}{p-value according to folmula 15.7}
 }
 }
 \description{
