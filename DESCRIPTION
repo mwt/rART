@@ -4,17 +4,10 @@ Title: Approximate Randomization Tests with a Small Number of Clusters
 Version: 0.1.0
 Author: Who wrote it
 Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Description: This package has several functions in R that are used in the paper
+    "A User’s Guide to Approximate Randomization Tests with a Small Number of Clusters"
 License: MIT
 Encoding: UTF-8
 LazyData: true
 ByteCompile: true
-Imports:
-  plm
-  Matrix
-  data.table
-  MASS
-  VGAM
-  sandwich
-  lmtest
+RoxygenNote: 7.1.1
