@@ -31,15 +31,18 @@ random.G <- function(q, B = 10000) {
 #' @param alpha significance level (dafault 0.05)
 #' @param nj q x 1 vector of sample sizes in each cluster (for alternative weighting)
 #'
-#' @return A list contating the following elements:
+#' @return A matrix contating the following elements:
 #' \describe{
-#'  \item{`rule`}{binary decision of the test}
-#'  \item{`Nrule`}{binary decision of the non-randomized test}
-#'  \item{`cv`}{the critical value of the randomization test}
-#'  \item{`pv`}{p-value according to folmula 15.5}
-#'  \item{`pv2`}{p-value according to folmula 15.7}
+#'  \item{`Crit. value`}{the critical value of the randomization test}
+#'  \item{`t value`}{the test statistic under the null hypothesis}
+#'  \item{`Pr(>|t|)`}{p-value according to folmula 15.5}
 #' }
 CRS.test <- function(c.beta, G, lambda = 0, alpha = 0.05, nj = 1) {
+  if (any(is.na(c.beta))) {
+    return(
+      c("Crit. value" = NA, "t value" = NA, "Pr(>|t|)" = NA)
+    )
+  }
   q = length(c.beta);
   # # Number of clusters/estimators
   M = dim(G)[2];
@@ -61,21 +64,11 @@ CRS.test <- function(c.beta, G, lambda = 0, alpha = 0.05, nj = 1) {
   Mplus = sum(NewT > NewT[k]);
   # M+ from LR book
   M0 = sum(NewT == NewT[k]);
-  # M0 from LR book
-  prob = (M * alpha - Mplus) / M0;
-  # term a(x) from LR book
-
-  # randomized Test
-  rule = (ObsT > NewT[k]) + (ObsT == NewT[k]) * (runif(1) <= prob);
-  # Non non-randomized Test
-  Nrule = (ObsT > NewT[k]);
   # Compute the p-value (formula (15.5) from LR book
   p.value = sum(NewT >= ObsT) / M;
-  # Compute the p-value (formula (15.7) from LR book
-  p.value2 = (sum(NewT >= ObsT) + 1) / (M + 1);
 
   # List of returns
-  list(rule = rule, Nrule = Nrule, cv = NewT[k], pv = p.value, pv2 = p.value2)
+  c("Crit. value" = NewT[k], "t value" = ObsT, "Pr(>|t|)" = p.value)
 }
 
 #-------------------------------------------------------------------

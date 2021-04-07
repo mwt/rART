@@ -122,15 +122,14 @@ artlm <- function (formula, data, cluster, select = NULL, subset, weights,
   if (!qr) z$qr <- NULL
   ## record the number of clusters
   z$ncluster <- length(cmfs)
-  ## transpose the cluster betas to intuitive shape
-  clbetas <- t(clbetas)
+  ## use all betas if none selected
   if(is.null(select)) {
     z$clbetas <- clbetas
   }
   else {
     # make unselected betas NA
     z$clbetas <- clbetas * NA
-    z$clbetas[,select] <- clbetas[,select]
+    z$clbetas[select,] <- clbetas[select,]
     z$select <- select
   }
   z
@@ -162,10 +161,10 @@ vcov.artlm <- function(...) {
 summary.artlm <- function(object, nrg, ...) {
   warning("ART does not provide variances")
   raw_lmsum <- summary.lm(object, ...)
-  raw_lmsum$coefficients[,c("Std. Error", "t value")] <- NA
   clbetas <- object$clbetas
   q <- object$ncluster
   raw_lmsum$Gs <- random.G(q = q)
-  raw_lmsum$test <- mapply(clbetas, 2, CRS.test, G = raw_lmsum$Gs)
+  test <- apply(clbetas, 1, CRS.test, G = raw_lmsum$Gs)
+  raw_lmsum$coefficients <- cbind("Estimate" = raw_lmsum$coefficients[,"Estimate"], t(test))
   raw_lmsum
 }

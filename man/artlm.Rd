@@ -7,6 +7,8 @@
 artlm(
   formula,
   data,
+  cluster,
+  select = NULL,
   subset,
   weights,
   na.action,
@@ -32,6 +34,13 @@ the variables in the model.  If not found in \code{data}, the
 variables are taken from \code{environment(formula)},
 typically the environment from which \code{lm} is called.}
 
+\item{cluster}{the name for the cluster variable contained in \code{data}
+or vector of clusters}
+
+\item{select}{an optional string or list of strings for the parameter(s) of
+interest. That is, the parameters you want to compute tests and CI for.
+Parameters as passed to \code{subset}.}
+
 \item{subset}{an optional vector specifying a subset of observations
 to be used in the fitting process.}
 
@@ -52,10 +61,6 @@ default is \code{\link{na.omit}}.  Another possible value is
 \code{method = "qr"} is supported; \code{method = "model.frame"} returns
 the model frame (the same as with \code{model = TRUE}, see below).}
 
-\item{model, x, y, qr}{logicals. If \code{TRUE} the corresponding
-components of the fit (the model frame, the model matrix, the
-response, the QR decomposition) are returned.}
-
 \item{singular.ok}{logical. If \code{FALSE} (the default in S but
 not in \R) a singular fit is an error.}
 
@@ -65,8 +70,8 @@ not in \R) a singular fit is an error.}
 \item{offset}{this can be used to specify an \emph{a priori} known
 component to be included in the linear predictor during fitting.
 This should be \code{NULL} or a numeric vector or matrix of extents
-matching those of the response.  One or more \code{\link{offset}} terms can be
-included in the formula instead or as well, and if more than one are
+matching those of the response.  One or more \code{\link{offset}} terms can
+be included in the formula instead or as well, and if more than one are
 specified their sum is used.  See \code{\link{model.offset}}.}
 
 \item{...}{additional arguments to be passed to the low level
