@@ -14,7 +14,7 @@ random.G <- function(q, B = 10000) {
   }
   # Draw B transformations from G otherwise
   else {
-    perm <- matrix(2 * ((runif(q * B) > 1 / 2) - 1 / 2), q, B);
+    perm <- matrix(sample(e, q * B, replace = T), q, B);
   }
   return(perm)
 }
