@@ -2,16 +2,18 @@
 % Please edit documentation in R/artlm.R
 \name{vcov.artlm}
 \alias{vcov.artlm}
-\title{Title}
+\title{Dummy vcov for ART}
 \usage{
 \method{vcov}{artlm}(...)
 }
 \arguments{
-\item{...}{}
+\item{...}{variables that are passed to \code{vcov.lm}}
 }
 \value{
-
+A matrix of \code{NA} values in the same shape as a variance
+  covariance matrix.
 }
 \description{
-Title
+ART does not generate standard errors or a variance covariance matrix. So,
+this function will always return \code{NA}.
 }

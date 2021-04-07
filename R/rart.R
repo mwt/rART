@@ -19,11 +19,9 @@ random.G <- function(q, B = 10000) {
   return(perm)
 }
 
-#-------------------------------------------------------------------
-
 #' Hypothesis Test for ART
 #'
-#' This helper function computes the randomization critical value for t-tests.
+#' This helper function computes the randomization critical value, t-statistic, and p-value ART.
 #'
 #' @param c.beta vector of parameters entering the null hypothesis c'beta - with one estimator per cluster (q x 1)
 #' @param G the group of all trasformations (use random.G to get)
@@ -71,7 +69,38 @@ CRS.test <- function(c.beta, G, lambda = 0, alpha = 0.05, nj = 1) {
   c("Crit. value" = NewT[k], "t value" = ObsT, "Pr(>|t|)" = p.value)
 }
 
-#-------------------------------------------------------------------
+#' Hypothesis Test for ART
+#'
+#' This helper function only determines whether the test passes. It is used by \code{CRS.CI}.
+#'
+#' @param c.beta vector of parameters entering the null hypothesis c'beta - with one estimator per cluster (q x 1)
+#' @param G the group of all trasformations (use random.G to get)
+#' @param lambda scalar for the null hypothesis c'beta = lambda (default 0)
+#' @param alpha significance level (dafault 0.05)
+#' @param nj q x 1 vector of sample sizes in each cluster (for alternative weighting)
+#'
+#' @return A \code{logical} that is true if the test rejects the null hypothesis.
+CRS.bin <- function(c.beta, G, lambda = 0, alpha = 0.05, nj = 1) {
+  q = length(c.beta);
+  # # Number of clusters/estimators
+  M = dim(G)[2];
+  # # of elements in G
+  if (length(nj) != 1 & length(nj) != q) { nj = 1 }
+
+  Sn = sqrt(q) * sqrt(nj) * (c.beta - lambda);
+
+  ObsT = abs(mean(Sn)) / sd(Sn);
+  # observed Test stat
+  NewX = G * as.vector(Sn);
+  # transformed data
+  # Compute New Test Stat over transformed data
+  NewT = abs(apply(NewX, 2, mean) / apply(NewX, 2, sd));
+  NewT = sort(NewT);
+  # sort the vector of Test Stat
+  k = M - floor(M * alpha);
+  # Non non-randomized Test
+  (ObsT > NewT[k])
+}
 
 #' Confidence Intervals for ART
 #'
@@ -98,20 +127,20 @@ CRS.CI <- function(c.beta, G, alpha = 0.05, nj = 1) {
   U = center + distance;
   #---------------------------------------------------------------
   # Find lower an upper bounds that are ``rejected''
-  lo.test <- CRS.test(c.beta, G, L, alpha);
+  lo.test <- CRS.bin(c.beta, G, L, alpha);
   ite = 1;
-  while (lo.test$Nrule == 0 & ite < 10) {
+  while (lo.test == 0 & ite < 10) {
     L = L - distance;
-    lo.test <- CRS.test(c.beta, G, L, alpha, nj);
+    lo.test <- CRS.bin(c.beta, G, L, alpha, nj);
     ite = ite + 9;
     if (ite == 10) { stop("Could not find proper lower bound") }
   }
 
-  hi.test <- CRS.test(c.beta, G, U, alpha);
+  hi.test <- CRS.bin(c.beta, G, U, alpha);
   ite = 1;
-  while (hi.test$Nrule == 0 & ite < 10) {
+  while (hi.test == 0 & ite < 10) {
     U = U - distance;
-    hi.test <- CRS.test(c.beta, G, U, alpha, nj);
+    hi.test <- CRS.bin(c.beta, G, U, alpha, nj);
     ite = ite + 1;
     if (ite == 10) { stop("Could not find proper upper bound") }
   }
@@ -125,8 +154,8 @@ CRS.CI <- function(c.beta, G, alpha = 0.05, nj = 1) {
     if (abs(Acc.L - Rej.L) / 2 < tolerance) { new.L = (Rej.L + Acc.L) / 2; break; }
     # compute new mid point
     new.L = (Rej.L + Acc.L) / 2;
-    lo.test <- CRS.test(c.beta, G, new.L, alpha, nj);
-    if (lo.test$Nrule == 0) { Acc.L = new.L; } else { Rej.L = new.L; }
+    lo.test <- CRS.bin(c.beta, G, new.L, alpha, nj);
+    if (lo.test == 0) { Acc.L = new.L; } else { Rej.L = new.L; }
     ite = ite + 1;
   }
   print(paste("iterations to find lower bound: ", ite))
@@ -140,8 +169,8 @@ CRS.CI <- function(c.beta, G, alpha = 0.05, nj = 1) {
     if (abs(Acc.U - Rej.U) / 2 < tolerance) { new.U = (Rej.U + Acc.U) / 2; break; }
     # compute new mid point
     new.U = (Rej.U + Acc.U) / 2;
-    hi.test <- CRS.test(c.beta, G, new.U, alpha, nj);
-    if (hi.test$Nrule == 0) { Acc.U = new.U; } else { Rej.U = new.U; }
+    hi.test <- CRS.bin(c.beta, G, new.U, alpha, nj);
+    if (hi.test == 0) { Acc.U = new.U; } else { Rej.U = new.U; }
     ite = ite + 1;
   }
   print(paste("iterations to find upper bound: ", ite))

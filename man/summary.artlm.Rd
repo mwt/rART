@@ -2,16 +2,19 @@
 % Please edit documentation in R/artlm.R
 \name{summary.artlm}
 \alias{summary.artlm}
-\title{Title}
+\title{Summarizing Linear Models with ART}
 \usage{
 \method{summary}{artlm}(object, nrg, ...)
 }
 \arguments{
+\item{object}{an object of class \code{"artlm"}, usually, a result of a
+call to \code{\link{artlm}}.}
+
 \item{...}{}
 }
 \value{
 
 }
 \description{
-Title
+Summarizing Linear Models with ART
 }

@@ -135,22 +135,25 @@ artlm <- function (formula, data, cluster, select = NULL, subset, weights,
   z
 }
 
-#' Title
+#' Dummy vcov for ART
 #'
-#' @param ...
+#' ART does not generate standard errors or a variance covariance matrix. So,
+#' this function will always return \code{NA}.
 #'
-#' @return
+#' @param ... variables that are passed to \code{vcov.lm}
+#'
+#' @return A matrix of \code{NA} values in the same shape as a variance
+#'   covariance matrix.
 #' @export
-#'
-#' @examples
 vcov.artlm <- function(...) {
   warning("ART does not provide variances")
   stats:::vcov.lm(...)*NA
 }
 
-#' Title
+#' Summarizing Linear Models with ART
 #'
-#' @param object
+#' @param object an object of class \code{"artlm"}, usually, a result of a
+#'   call to \code{\link{artlm}}.
 #' @param nrg
 #' @param ...
 #'
@@ -159,7 +162,6 @@ vcov.artlm <- function(...) {
 #'
 #' @examples
 summary.artlm <- function(object, nrg, ...) {
-  warning("ART does not provide variances")
   raw_lmsum <- summary.lm(object, ...)
   clbetas <- object$clbetas
   q <- object$ncluster
@@ -167,4 +169,26 @@ summary.artlm <- function(object, nrg, ...) {
   test <- apply(clbetas, 1, CRS.test, G = raw_lmsum$Gs)
   raw_lmsum$coefficients <- cbind("Estimate" = raw_lmsum$coefficients[,"Estimate"], t(test))
   raw_lmsum
+}
+
+confint.artlm <- function(object, parm, level = 0.95) {
+  cf <- coef(object)
+  pnames <- names(cf)
+  if (missing(parm))
+    parm <- pnames
+  else if (is.numeric(parm))
+    parm <- pnames[parm]
+  a <- (1 - level)/2
+  a <- c(a, 1 - a)
+  pct <- stats:::format.perc(a, 3)
+  ci <- array(NA, dim = c(length(parm), 2L), dimnames = list(parm, pct))
+  q <- object$ncluster
+  clbetas <- object$clbetas[parm,]
+  G <- random.G(q = q)
+  if (length(parm) == 1L) {
+    ci[] <- t(CRS.CI(clbetas, G = G, alpha = (1 - level)))
+  } else {
+    ci[] <- t(apply(clbetas, 1, CRS.CI, G = G, alpha = (1 - level)))
+  }
+  ci
 }
