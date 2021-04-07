@@ -154,24 +154,41 @@ vcov.artlm <- function(...) {
 #'
 #' @param object an object of class \code{"artlm"}, usually, a result of a
 #'   call to \code{\link{artlm}}.
-#' @param nrg
-#' @param ...
+#' @param nrg an \code{integer} that represents the number of random
+#'   permutations to calculate when there are more than 10 groups. Defaults
+#'   to 10,000.
+#' @param ... Other parameters that can be passed to the base
+#'   \code{\link{summary.lm}}.
 #'
-#' @return
+#' @return A summary object as in \code{\link{summary.lm}}.
 #' @export
-#'
-#' @examples
-summary.artlm <- function(object, nrg, ...) {
+summary.artlm <- function(object, nrg = 10000, ...) {
   raw_lmsum <- summary.lm(object, ...)
   clbetas <- object$clbetas
   q <- object$ncluster
-  raw_lmsum$Gs <- random.G(q = q)
+  raw_lmsum$Gs <- random.G(q = q, B = nrg)
   test <- apply(clbetas, 1, CRS.test, G = raw_lmsum$Gs)
   raw_lmsum$coefficients <- cbind("Estimate" = raw_lmsum$coefficients[,"Estimate"], t(test))
   raw_lmsum
 }
 
-confint.artlm <- function(object, parm, level = 0.95) {
+#' Confidence Intervals for Linear ART Parameters
+#'
+#' @param an object of class \code{"artlm"}, usually, a result of a call to
+#'   \code{\link{artlm}}.
+#' @param parm a specification of which parameters are to be given confidence
+#'   intervals, either a vector of numbers or a vector of names. If missing,
+#'   all parameters are considered.
+#' @param nrg an \code{integer} that represents the number of random
+#'   permutations to calculate when there are more than 10 groups. Defaults
+#'   to 10,000.
+#' @param level the confidence level required. Defaults to 95\%
+#'
+#' @return  A matrix (or vector) with columns giving lower and upper confidence
+#'   limits for each parameter. These will be labelled as (1-level)/2 and
+#'   1 - (1-level)/2 in \% (by default 2.5\% and 97.5\%).
+#' @export
+confint.artlm <- function(object, parm, nrg = 10000, level = 0.95) {
   cf <- coef(object)
   pnames <- names(cf)
   if (missing(parm))
@@ -184,7 +201,7 @@ confint.artlm <- function(object, parm, level = 0.95) {
   ci <- array(NA, dim = c(length(parm), 2L), dimnames = list(parm, pct))
   q <- object$ncluster
   clbetas <- object$clbetas[parm,]
-  G <- random.G(q = q)
+  G <- random.G(q = q, B = nrg)
   if (length(parm) == 1L) {
     ci[] <- t(CRS.CI(clbetas, G = G, alpha = (1 - level)))
   } else {

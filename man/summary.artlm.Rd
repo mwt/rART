@@ -4,16 +4,21 @@
 \alias{summary.artlm}
 \title{Summarizing Linear Models with ART}
 \usage{
-\method{summary}{artlm}(object, nrg, ...)
+\method{summary}{artlm}(object, nrg = 10000, ...)
 }
 \arguments{
 \item{object}{an object of class \code{"artlm"}, usually, a result of a
 call to \code{\link{artlm}}.}
 
-\item{...}{}
+\item{nrg}{an \code{integer} that represents the number of random
+permutations to calculate when there are more than 10 groups. Defaults
+to 10,000.}
+
+\item{...}{Other parameters that can be passed to the base
+\code{\link{summary.lm}}.}
 }
 \value{
-
+A summary object as in \code{\link{summary.lm}}.
 }
 \description{
 Summarizing Linear Models with ART
