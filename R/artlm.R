@@ -8,6 +8,11 @@
 #'   the variables in the model.  If not found in \code{data}, the
 #'   variables are taken from \code{environment(formula)},
 #'   typically the environment from which \code{lm} is called.
+#' @param cluster the name for the cluster variable contained in \code{data}
+#'   or vector of clusters
+#' @param select an optional string or list of strings for the parameter(s) of
+#'   interest. That is, the parameters you want to compute tests and CI for.
+#'   Parameters as passed to \code{subset}.
 #' @param subset an optional vector specifying a subset of observations
 #'   to be used in the fitting process.
 #' @param weights an optional vector of weights to be used in the fitting
@@ -24,9 +29,6 @@
 #' @param method the method to be used; for fitting, currently only
 #'   \code{method = "qr"} is supported; \code{method = "model.frame"} returns
 #'   the model frame (the same as with \code{model = TRUE}, see below).
-#' @param model,x,y,qr logicals. If \code{TRUE} the corresponding
-#'   components of the fit (the model frame, the model matrix, the
-#'   response, the QR decomposition) are returned.
 #' @param singular.ok logical. If \code{FALSE} (the default in S but
 #'   not in \R) a singular fit is an error.
 #' @param contrasts an optional list. See the \code{contrasts.arg}
@@ -34,8 +36,8 @@
 #' @param offset this can be used to specify an \emph{a priori} known
 #'   component to be included in the linear predictor during fitting.
 #'   This should be \code{NULL} or a numeric vector or matrix of extents
-#'   matching those of the response.  One or more \code{\link{offset}} terms can be
-#'   included in the formula instead or as well, and if more than one are
+#'   matching those of the response.  One or more \code{\link{offset}} terms can
+#'   be included in the formula instead or as well, and if more than one are
 #'   specified their sum is used.  See \code{\link{model.offset}}.
 #' @param ... additional arguments to be passed to the low level
 #'   regression fitting functions (see below).
@@ -43,16 +45,16 @@
 #' @return \code{lm} returns an object of \code{\link{class}} \code{"lm"} or for
 #'   multiple responses of class \code{c("mlm", "lm")}.
 #' @export
-artlm <- function (formula, data, subset, weights, na.action,
-                method = "qr", model = TRUE, x = FALSE, y = FALSE,
-                qr = TRUE, singular.ok = TRUE, contrasts = NULL,
-                offset, ...)
+artlm <- function (formula, data, cluster, select = NULL, subset, weights,
+                na.action, method = "qr", model = TRUE, x = FALSE,
+                y = FALSE, qr = TRUE, singular.ok = TRUE,
+                contrasts = NULL, offset, ...)
 {
   ret.x <- x
   ret.y <- y
   cl <- match.call()
   mf <- match.call(expand.dots = FALSE)
-  m <- match(c("formula", "data", "subset", "weights", "na.action", "offset"),
+  m <- match(c("formula", "data", "subset", "weights", "na.action", "offset", "cluster"),
              names(mf), 0L)
   mf <- mf[c(1L, m)]
   mf$drop.unused.levels <- TRUE
@@ -71,10 +73,11 @@ artlm <- function (formula, data, subset, weights, na.action,
   if(!is.null(w) && !is.numeric(w))
     stop("'weights' must be a numeric vector")
   offset <- model.offset(mf)
-  mlm <- is.matrix(y)
-  ny <- if(mlm) nrow(y) else length(y)
+  if(is.matrix(y))
+    stop("'y' is a matrix but a vector is required")
+  ny <- length(y)
   if(!is.null(offset)) {
-    if(!mlm) offset <- as.vector(offset)
+    offset <- as.vector(offset)
     if(NROW(offset) != ny)
       stop(gettextf("number of offsets is %d, should equal %d (number of observations)",
                     NROW(offset), ny), domain = NA)
@@ -82,8 +85,7 @@ artlm <- function (formula, data, subset, weights, na.action,
 
   if (is.empty.model(mt)) {
     x <- NULL
-    z <- list(coefficients = if(mlm) matrix(NA_real_, 0, ncol(y))
-              else numeric(),
+    z <- list(coefficients = numeric(),
               residuals = y,
               fitted.values = 0 * y, weights = w, rank = 0L,
               df.residual = if(!is.null(w)) sum(w != 0) else ny)
@@ -94,11 +96,17 @@ artlm <- function (formula, data, subset, weights, na.action,
   }
   else {
     x <- model.matrix(mt, mf, contrasts)
-    z <- if(is.null(w)) lm.fit(x, y, offset = offset,
-                               singular.ok=singular.ok, ...)
-    else lm.wfit(x, y, w, offset = offset, singular.ok=singular.ok, ...)
+    ## make a list of model frames by cluster
+    cmfs <- split(mf, model.extract(mf, "cluster"))
+    if(is.null(w)) {
+      z <- lm.fit(x, y, offset = offset, singular.ok=singular.ok, ...)
+      clbetas <- vapply(cmfs, clm.fits, z$coefficients, mt = mt, contrasts = contrasts, singular.ok=singular.ok, ...)
+    } else {
+      z <- lm.wfit(x, y, w, offset = offset, singular.ok=singular.ok, ...)
+    }
+    #For Loop Here
   }
-  class(z) <- c(if(mlm) "mlm", "lm")
+  class(z) <- c("artlm", "lm")
   z$na.action <- attr(mf, "na.action")
   z$offset <- offset
   z$contrasts <- attr(x, "contrasts")
@@ -112,5 +120,52 @@ artlm <- function (formula, data, subset, weights, na.action,
   if (ret.y)
     z$y <- y
   if (!qr) z$qr <- NULL
+  ## record the number of clusters
+  z$ncluster <- length(cmfs)
+  ## transpose the cluster betas to intuitive shape
+  clbetas <- t(clbetas)
+  if(is.null(select)) {
+    z$clbetas <- clbetas
+  }
+  else {
+    # make unselected betas NA
+    z$clbetas <- clbetas * NA
+    z$clbetas[,select] <- clbetas[,select]
+    z$select <- select
+  }
   z
+}
+
+#' Title
+#'
+#' @param ...
+#'
+#' @return
+#' @export
+#'
+#' @examples
+vcov.artlm <- function(...) {
+  warning("ART does not provide variances")
+  stats:::vcov.lm(...)*NA
+}
+
+#' Title
+#'
+#' @param object
+#' @param nrg
+#' @param ...
+#'
+#' @return
+#' @export
+#'
+#' @examples
+summary.artlm <- function(object, nrg, ...) {
+  warning("ART does not provide variances")
+  raw_lmsum <- summary.lm(object, ...)
+  raw_lmsum$coefficients[,c("Std. Error", "t value")] <- NA
+  clbetas <- object$clbetas
+  q <- object$ncluster
+  raw_lmsum$Gs <- random.G(q = q)
+  raw_lmsum$test <- mapply(clbetas, 2, CRS.test, G = raw_lmsum$Gs)
+  raw_lmsum
 }
