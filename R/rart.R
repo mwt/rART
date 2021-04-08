@@ -7,14 +7,14 @@
 #'
 #' @return A B x q matrix of transformations (G)
 random.G <- function(q, B = 10000) {
+  e <- c(1, -1)
   if (q < 11) {
-    e <- c(1, -1);
-    B <- 2 ^ q;
-    perm <- t(expand.grid(rep(list(e), q)));
+    B <- 2 ^ q
+    perm <- t(expand.grid(rep(list(e), q)))
   }
   # Draw B transformations from G otherwise
   else {
-    perm <- matrix(sample(e, q * B, replace = T), q, B);
+    perm <- matrix(sample(e, q * B, replace = T), q, B)
   }
   return(perm)
 }
