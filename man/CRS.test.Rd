@@ -20,9 +20,9 @@ CRS.test(c.beta, G, lambda = 0, alpha = 0.05, nj = 1)
 \value{
 A matrix contating the following elements:
 \describe{
- \item{`Crit. value`}{the critical value of the randomization test}
- \item{`t value`}{the test statistic under the null hypothesis}
- \item{`Pr(>|t|)`}{p-value according to folmula 15.5}
+\item{\verb{Crit. value}}{the critical value of the randomization test}
+\item{\verb{t value}}{the test statistic under the null hypothesis}
+\item{\verb{Pr(>|t|)}}{p-value according to folmula 15.5}
 }
 }
 \description{

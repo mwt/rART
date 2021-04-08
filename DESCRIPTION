@@ -10,4 +10,13 @@ License: MIT
 Encoding: UTF-8
 LazyData: true
 ByteCompile: true
+Imports:
+  car
+Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
+Depends: 
+    R (>= 2.10)
+Suggests: 
+    rmarkdown,
+    knitr
+VignetteBuilder: knitr

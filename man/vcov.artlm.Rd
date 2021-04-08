@@ -11,7 +11,7 @@
 }
 \value{
 A matrix of \code{NA} values in the same shape as a variance
-  covariance matrix.
+covariance matrix.
 }
 \description{
 ART does not generate standard errors or a variance covariance matrix. So,

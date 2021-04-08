@@ -3,4 +3,5 @@
 S3method(confint,artlm)
 S3method(summary,artlm)
 S3method(vcov,artlm)
+export(ARTHypothesis)
 export(artlm)

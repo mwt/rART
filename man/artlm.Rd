@@ -79,7 +79,7 @@ regression fitting functions (see below).}
 }
 \value{
 \code{lm} returns an object of \code{\link{class}} \code{"lm"} or for
-  multiple responses of class \code{c("mlm", "lm")}.
+multiple responses of class \code{c("mlm", "lm")}.
 }
 \description{
 ART Linear Model
