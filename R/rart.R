@@ -114,6 +114,11 @@ CRS.bin <- function(c.beta, G, lambda = 0, alpha = 0.05, nj = 1) {
 #'
 #' @return The 1-alpha confidence interval for c'beta
 CRS.CI <- function(c.beta, G, alpha = 0.05, nj = 1) {
+  if (any(is.na(c.beta))) {
+    return(
+      c(NA, NA)
+    )
+  }
   max_ite = 100
   tolerance = mean(c.beta) / 1000;
   #---------------------------------------------------------------
@@ -158,7 +163,7 @@ CRS.CI <- function(c.beta, G, alpha = 0.05, nj = 1) {
     if (lo.test == 0) { Acc.L = new.L; } else { Rej.L = new.L; }
     ite = ite + 1;
   }
-  print(paste("iterations to find lower bound: ", ite))
+  #print(paste("iterations to find lower bound: ", ite))
 
   ite = 1;
   Rej.U = U;
@@ -173,7 +178,7 @@ CRS.CI <- function(c.beta, G, alpha = 0.05, nj = 1) {
     if (hi.test == 0) { Acc.U = new.U; } else { Rej.U = new.U; }
     ite = ite + 1;
   }
-  print(paste("iterations to find upper bound: ", ite))
+  #print(paste("iterations to find upper bound: ", ite))
   Cn = c(new.L, new.U)
 
   return(Cn)
