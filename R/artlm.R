@@ -103,6 +103,7 @@ artlm <- function (formula, data, cluster, select = NULL, subset, weights,
       clbetas <- vapply(cmfs, clm.fits, z$coefficients, mt = mt, contrasts = contrasts, singular.ok=singular.ok, ...)
     } else {
       z <- lm.wfit(x, y, w, offset = offset, singular.ok=singular.ok, ...)
+      clbetas <- vapply(cmfs, clm.wfits, z$coefficients, mt = mt, contrasts = contrasts, singular.ok=singular.ok, ...)
     }
     #For Loop Here
   }
