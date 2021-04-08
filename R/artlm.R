@@ -204,10 +204,12 @@ confint.artlm <- function(object, parm, nrg = 10000, level = 0.95) {
   q <- object$ncluster
   clbetas <- object$clbetas[parm,]
   G <- random.G(q = q, B = nrg)
+  # if there is only one variable, then don't use apply
   if (length(parm) == 1L) {
     ci[] <- t(CRS.CI(clbetas, G = G, alpha = (1 - level)))
   } else {
     ci[] <- t(apply(clbetas, 1, CRS.CI, G = G, alpha = (1 - level)))
   }
-  ci
+  # remove NAs
+  ci[complete.cases(ci),]
 }
