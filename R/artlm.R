@@ -169,7 +169,8 @@ summary.artlm <- function(object, nrg = 10000, ...) {
   q <- object$ncluster
   raw_lmsum$Gs <- random.G(q = q, B = nrg)
   test <- apply(clbetas, 1, CRS.test, G = raw_lmsum$Gs)
-  raw_lmsum$coefficients <- cbind("Estimate" = raw_lmsum$coefficients[,"Estimate"], t(test))
+  raw_lmsum$coefficients <- na.omit(
+    cbind("Estimate" = raw_lmsum$coefficients[,"Estimate"], t(test)))
   raw_lmsum
 }
 
