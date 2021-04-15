@@ -106,7 +106,6 @@ artlm <- function (formula, data, cluster, select = NULL, subset, weights,
       clbetas <- vapply(cmfs, clm.wfits, z$coefficients, mt = mt,
                         contrasts = contrasts, singular.ok=singular.ok, ...)
     }
-    #For Loop Here
   }
   class(z) <- c("artlm", "lm")
   z$na.action <- attr(mf, "na.action")
