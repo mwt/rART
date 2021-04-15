@@ -1,49 +1,47 @@
 #' ART Linear Model
 #'
-#' @param formula an object of class \code{"\link{formula}"} (or one that
+#' @param formula an object of class [formula] (or one that
 #'   can be coerced to that class): a symbolic description of the
 #'   model to be fitted.
-#' @param data an optional data frame, list or environment (or object
-#'   coercible by \code{\link{as.data.frame}} to a data frame) containing
-#'   the variables in the model.  If not found in \code{data}, the
-#'   variables are taken from \code{environment(formula)},
-#'   typically the environment from which \code{lm} is called.
-#' @param cluster the name for the cluster variable contained in \code{data}
-#'   or vector of clusters
+#' @param data an optional data frame, list or environment (or object coercible
+#'   by [as.data.frame] to a data frame) containing the variables in the model.
+#'   If not found in `data`, the variables are taken from `environment(formula)`
+#'   , typically the environment from which [lm()] is called.
+#' @param cluster the name for the cluster variable contained in `data` or
+#'   vector of clusters
 #' @param select an optional string or list of strings for the parameter(s) of
 #'   interest. That is, the parameters you want to compute tests and CI for.
-#'   Parameters as passed to \code{subset}.
+#'   Parameters as passed to `subset`.
 #' @param subset an optional vector specifying a subset of observations
 #'   to be used in the fitting process.
 #' @param weights an optional vector of weights to be used in the fitting
-#'   process.  Should be \code{NULL} or a numeric vector.
+#'   process.  Should be `NULL` or a numeric vector.
 #'   If non-NULL, weighted least squares is used with weights
-#'   \code{weights} (that is, minimizing \code{sum(w*e^2)}); otherwise
+#'   `weights` (that is, minimizing `sum(w*e^2)`); otherwise
 #'   ordinary least squares is used.  See also \sQuote{Details},
 #' @param na.action a function which indicates what should happen
-#'   when the data contain \code{NA}s.  The default is set by
-#'   the \code{na.action} setting of \code{\link{options}}, and is
-#'   \code{\link{na.fail}} if that is unset.  The \sQuote{factory-fresh}
-#'   default is \code{\link{na.omit}}.  Another possible value is
-#'   \code{NULL}, no action.  Value \code{\link{na.exclude}} can be useful.
+#'   when the data contain `NA`s.  The default is set by
+#'   the `na.action` setting of [options], and is
+#'   [na.fail] if that is unset.  The \sQuote{factory-fresh}
+#'   default is [na.omit].  Another possible value is
+#'   `NULL`, no action.  Value [na.exclude] can be useful.
 #' @param method the method to be used; for fitting, currently only
-#'   \code{method = "qr"} is supported; \code{method = "model.frame"} returns
-#'   the model frame (the same as with \code{model = TRUE}, see below).
-#' @param singular.ok logical. If \code{FALSE} (the default in S but
+#'   `method = "qr"` is supported; `method = "model.frame"` returns the model
+#'   frame (the same as with `model = TRUE`, see below).
+#' @param singular.ok logical. If `FALSE` (the default in S but
 #'   not in \R) a singular fit is an error.
-#' @param contrasts an optional list. See the \code{contrasts.arg}
-#'   \code{\link{model.matrix.default}}.
-#' @param offset this can be used to specify an \emph{a priori} known
+#' @param contrasts an optional list. See the `contrasts.arg`
+#'   [model.matrix.default].
+#' @param offset this can be used to specify an *a priori* known
 #'   component to be included in the linear predictor during fitting.
-#'   This should be \code{NULL} or a numeric vector or matrix of extents
-#'   matching those of the response.  One or more \code{\link{offset}} terms can
+#'   This should be `NULL` or a numeric vector or matrix of extents
+#'   matching those of the response.  One or more [offset] terms can
 #'   be included in the formula instead or as well, and if more than one are
-#'   specified their sum is used.  See \code{\link{model.offset}}.
+#'   specified their sum is used.  See [model.offset].
 #' @param ... additional arguments to be passed to the low level
 #'   regression fitting functions (see below).
 #'
-#' @return \code{lm} returns an object of \code{\link{class}} \code{"lm"} or for
-#'   multiple responses of class \code{c("mlm", "lm")}.
+#' @return an object of [class] `c("artlm", "lm")`.
 #' @export
 artlm <- function (formula, data, cluster, select = NULL, subset, weights,
                 na.action, method = "qr", model = TRUE, x = FALSE,
@@ -54,7 +52,8 @@ artlm <- function (formula, data, cluster, select = NULL, subset, weights,
   ret.y <- y
   cl <- match.call()
   mf <- match.call(expand.dots = FALSE)
-  m <- match(c("formula", "data", "subset", "weights", "na.action", "offset", "cluster"),
+  m <- match(c("formula", "data", "subset", "weights",
+               "na.action", "offset", "cluster"),
              names(mf), 0L)
   mf <- mf[c(1L, m)]
   mf$drop.unused.levels <- TRUE
@@ -100,10 +99,12 @@ artlm <- function (formula, data, cluster, select = NULL, subset, weights,
     cmfs <- split(mf, model.extract(mf, "cluster"))
     if(is.null(w)) {
       z <- lm.fit(x, y, offset = offset, singular.ok=singular.ok, ...)
-      clbetas <- vapply(cmfs, clm.fits, z$coefficients, mt = mt, contrasts = contrasts, singular.ok=singular.ok, ...)
+      clbetas <- vapply(cmfs, clm.fits, z$coefficients, mt = mt,
+                        contrasts = contrasts, singular.ok=singular.ok, ...)
     } else {
       z <- lm.wfit(x, y, w, offset = offset, singular.ok=singular.ok, ...)
-      clbetas <- vapply(cmfs, clm.wfits, z$coefficients, mt = mt, contrasts = contrasts, singular.ok=singular.ok, ...)
+      clbetas <- vapply(cmfs, clm.wfits, z$coefficients, mt = mt,
+                        contrasts = contrasts, singular.ok=singular.ok, ...)
     }
     #For Loop Here
   }
@@ -139,11 +140,11 @@ artlm <- function (formula, data, cluster, select = NULL, subset, weights,
 #' Dummy vcov for ART
 #'
 #' ART does not generate standard errors or a variance covariance matrix. So,
-#' this function will always return \code{NA}.
+#' this function will always return `NA`.
 #'
-#' @param ... variables that are passed to \code{vcov.lm}
+#' @param ... variables that are passed to [vcov.lm()]
 #'
-#' @return A matrix of \code{NA} values in the same shape as a variance
+#' @return A matrix of `NA` values in the same shape as a variance
 #'   covariance matrix.
 #' @export
 vcov.artlm <- function(...) {
@@ -153,15 +154,15 @@ vcov.artlm <- function(...) {
 
 #' Summarizing Linear Models with ART
 #'
-#' @param object an object of class \code{"artlm"}, usually, a result of a
-#'   call to \code{\link{artlm}}.
-#' @param nrg an \code{integer} that represents the number of random
+#' @param object an object of class `"artlm"`, usually, a result of a
+#'   call to [artlm()].
+#' @param nrg an `integer` that represents the number of random
 #'   permutations to calculate when there are more than 10 groups. Defaults
 #'   to 10,000.
 #' @param ... Other parameters that can be passed to the base
-#'   \code{\link{summary.lm}}.
+#'   [summary.lm()].
 #'
-#' @return A summary object as in \code{\link{summary.lm}}.
+#' @return A summary object as in [summary.lm()].
 #' @export
 summary.artlm <- function(object, nrg = 10000, ...) {
   raw_lmsum <- summary.lm(object, ...)
@@ -176,19 +177,18 @@ summary.artlm <- function(object, nrg = 10000, ...) {
 
 #' Confidence Intervals for Linear ART Parameters
 #'
-#' @param an object of class \code{"artlm"}, usually, a result of a call to
-#'   \code{\link{artlm}}.
+#' @param an object of class `"artlm"`, usually, a result of a call to
+#'   [artlm()].
 #' @param parm a specification of which parameters are to be given confidence
 #'   intervals, either a vector of numbers or a vector of names. If missing,
 #'   all parameters are considered.
-#' @param nrg an \code{integer} that represents the number of random
-#'   permutations to calculate when there are more than 10 groups. Defaults
-#'   to 10,000.
-#' @param level the confidence level required. Defaults to 95\%
+#' @param nrg an `integer` that represents the number of random permutations to
+#'   calculate when there are more than 10 groups. Defaults to 10,000.
+#' @param level the confidence level required. Defaults to 95%
 #'
 #' @return  A matrix (or vector) with columns giving lower and upper confidence
-#'   limits for each parameter. These will be labelled as (1-level)/2 and
-#'   1 - (1-level)/2 in \% (by default 2.5\% and 97.5\%).
+#'   limits for each parameter. These will be labeled as (1-level)/2 and
+#'   1 - (1-level)/2 in % (by default 2.5% and 97.5%).
 #' @export
 confint.artlm <- function(object, parm, nrg = 10000, level = 0.95) {
   cf <- coef(object)

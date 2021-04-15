@@ -30,11 +30,9 @@ random.G <- function(q, B = 10000) {
 #' @param nj q x 1 vector of sample sizes in each cluster (for alternative weighting)
 #'
 #' @return A matrix contating the following elements:
-#' \describe{
 #'  \item{`Crit. value`}{the critical value of the randomization test}
 #'  \item{`t value`}{the test statistic under the null hypothesis}
 #'  \item{`Pr(>|t|)`}{p-value according to folmula 15.5}
-#' }
 CRS.test <- function(c.beta, G, lambda = 0, alpha = 0.05, nj = 1) {
   if (any(is.na(c.beta))) {
     return(
@@ -71,7 +69,7 @@ CRS.test <- function(c.beta, G, lambda = 0, alpha = 0.05, nj = 1) {
 
 #' Hypothesis Test for ART
 #'
-#' This helper function only determines whether the test passes. It is used by \code{CRS.CI}.
+#' This helper function only determines whether the test passes. It is used by [CRS.CI()].
 #'
 #' @param c.beta vector of parameters entering the null hypothesis c'beta - with one estimator per cluster (q x 1)
 #' @param G the group of all trasformations (use random.G to get)
@@ -79,7 +77,7 @@ CRS.test <- function(c.beta, G, lambda = 0, alpha = 0.05, nj = 1) {
 #' @param alpha significance level (dafault 0.05)
 #' @param nj q x 1 vector of sample sizes in each cluster (for alternative weighting)
 #'
-#' @return A \code{logical} that is true if the test rejects the null hypothesis.
+#' @return A `logical` that is true if the test rejects the null hypothesis.
 CRS.bin <- function(c.beta, G, lambda = 0, alpha = 0.05, nj = 1) {
   q = length(c.beta);
   # # Number of clusters/estimators

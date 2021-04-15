@@ -1,15 +1,21 @@
-#' Title
+#' Linear Hypothesis Test for ART
 #'
-#' @param model
-#' @param hypothesis.matrix
-#' @param rhs
-#' @param coef.
-#' @param ...
+#' This package allows for arbitrary hypothesis testing with ART. It requires
+#' commands from the `car` library.
+#'
+#' @param model an object of class `"artlm"`, usually, a result of a call to
+#'   [artlm()].
+#' @param hypothesis.matrix matrix (or vector) giving linear combinations of
+#'   coefficients by rows, or a character vector giving the hypothesis in
+#'   symbolic form (see [car::linearHypothesis()])
+#' @param rhs right-hand-side vector for hypothesis, with as many entries as
+#'   rows in the hypothesis matrix; can be omitted, in which case it defaults to
+#'   a vector of zeroes.
 #'
 #' @return
 #' @seealso [car::linearHypothesis()]
 #' @export
-ARTHypothesis <- function(model, hypothesis.matrix, rhs=NULL, ...)
+ARTHypothesis <- function(model, hypothesis.matrix, rhs=NULL)
 {
   b <- model$clbetas[complete.cases(model$clbetas),]
   if (is.character(hypothesis.matrix)) {

@@ -24,18 +24,17 @@ artlm(
 )
 }
 \arguments{
-\item{formula}{an object of class \code{"\link{formula}"} (or one that
+\item{formula}{an object of class \link{formula} (or one that
 can be coerced to that class): a symbolic description of the
 model to be fitted.}
 
-\item{data}{an optional data frame, list or environment (or object
-coercible by \code{\link{as.data.frame}} to a data frame) containing
-the variables in the model.  If not found in \code{data}, the
-variables are taken from \code{environment(formula)},
-typically the environment from which \code{lm} is called.}
+\item{data}{an optional data frame, list or environment (or object coercible
+by \link{as.data.frame} to a data frame) containing the variables in the model.
+If not found in \code{data}, the variables are taken from \code{environment(formula)}
+, typically the environment from which \code{\link[=lm]{lm()}} is called.}
 
-\item{cluster}{the name for the cluster variable contained in \code{data}
-or vector of clusters}
+\item{cluster}{the name for the cluster variable contained in \code{data} or
+vector of clusters}
 
 \item{select}{an optional string or list of strings for the parameter(s) of
 interest. That is, the parameters you want to compute tests and CI for.
@@ -52,34 +51,33 @@ ordinary least squares is used.  See also \sQuote{Details},}
 
 \item{na.action}{a function which indicates what should happen
 when the data contain \code{NA}s.  The default is set by
-the \code{na.action} setting of \code{\link{options}}, and is
-\code{\link{na.fail}} if that is unset.  The \sQuote{factory-fresh}
-default is \code{\link{na.omit}}.  Another possible value is
-\code{NULL}, no action.  Value \code{\link{na.exclude}} can be useful.}
+the \code{na.action} setting of \link{options}, and is
+\link{na.fail} if that is unset.  The \sQuote{factory-fresh}
+default is \link{na.omit}.  Another possible value is
+\code{NULL}, no action.  Value \link{na.exclude} can be useful.}
 
 \item{method}{the method to be used; for fitting, currently only
-\code{method = "qr"} is supported; \code{method = "model.frame"} returns
-the model frame (the same as with \code{model = TRUE}, see below).}
+\code{method = "qr"} is supported; \code{method = "model.frame"} returns the model
+frame (the same as with \code{model = TRUE}, see below).}
 
 \item{singular.ok}{logical. If \code{FALSE} (the default in S but
 not in \R) a singular fit is an error.}
 
 \item{contrasts}{an optional list. See the \code{contrasts.arg}
-\code{\link{model.matrix.default}}.}
+\link{model.matrix.default}.}
 
 \item{offset}{this can be used to specify an \emph{a priori} known
 component to be included in the linear predictor during fitting.
 This should be \code{NULL} or a numeric vector or matrix of extents
-matching those of the response.  One or more \code{\link{offset}} terms can
+matching those of the response.  One or more \link{offset} terms can
 be included in the formula instead or as well, and if more than one are
-specified their sum is used.  See \code{\link{model.offset}}.}
+specified their sum is used.  See \link{model.offset}.}
 
 \item{...}{additional arguments to be passed to the low level
 regression fitting functions (see below).}
 }
 \value{
-\code{lm} returns an object of \code{\link{class}} \code{"lm"} or for
-multiple responses of class \code{c("mlm", "lm")}.
+an object of \link{class} \code{c("artlm", "lm")}.
 }
 \description{
 ART Linear Model

@@ -7,7 +7,7 @@
 \method{vcov}{artlm}(...)
 }
 \arguments{
-\item{...}{variables that are passed to \code{vcov.lm}}
+\item{...}{variables that are passed to \code{\link[=vcov.lm]{vcov.lm()}}}
 }
 \value{
 A matrix of \code{NA} values in the same shape as a variance

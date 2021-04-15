@@ -11,19 +11,18 @@
 intervals, either a vector of numbers or a vector of names. If missing,
 all parameters are considered.}
 
-\item{nrg}{an \code{integer} that represents the number of random
-permutations to calculate when there are more than 10 groups. Defaults
-to 10,000.}
+\item{nrg}{an \code{integer} that represents the number of random permutations to
+calculate when there are more than 10 groups. Defaults to 10,000.}
 
-\item{level}{the confidence level required. Defaults to 95\\%}
+\item{level}{the confidence level required. Defaults to 95\%}
 
 \item{an}{object of class \code{"artlm"}, usually, a result of a call to
-\code{\link{artlm}}.}
+\code{\link[=artlm]{artlm()}}.}
 }
 \value{
 A matrix (or vector) with columns giving lower and upper confidence
-limits for each parameter. These will be labelled as (1-level)/2 and
-1 - (1-level)/2 in \\% (by default 2.5\\% and 97.5\\%).
+limits for each parameter. These will be labeled as (1-level)/2 and
+1 - (1-level)/2 in \% (by default 2.5\% and 97.5\%).
 }
 \description{
 Confidence Intervals for Linear ART Parameters

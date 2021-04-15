@@ -8,17 +8,17 @@
 }
 \arguments{
 \item{object}{an object of class \code{"artlm"}, usually, a result of a
-call to \code{\link{artlm}}.}
+call to \code{\link[=artlm]{artlm()}}.}
 
 \item{nrg}{an \code{integer} that represents the number of random
 permutations to calculate when there are more than 10 groups. Defaults
 to 10,000.}
 
 \item{...}{Other parameters that can be passed to the base
-\code{\link{summary.lm}}.}
+\code{\link[=summary.lm]{summary.lm()}}.}
 }
 \value{
-A summary object as in \code{\link{summary.lm}}.
+A summary object as in \code{\link[=summary.lm]{summary.lm()}}.
 }
 \description{
 Summarizing Linear Models with ART

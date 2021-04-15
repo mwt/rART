@@ -21,5 +21,5 @@ CRS.bin(c.beta, G, lambda = 0, alpha = 0.05, nj = 1)
 A \code{logical} that is true if the test rejects the null hypothesis.
 }
 \description{
-This helper function only determines whether the test passes. It is used by \code{CRS.CI}.
+This helper function only determines whether the test passes. It is used by \code{\link[=CRS.CI]{CRS.CI()}}.
 }
