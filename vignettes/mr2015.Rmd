@@ -20,7 +20,7 @@ set.seed(123)
 data("mr2015")
 ```
 
-This example is from Section 4.2 of "A User's Guide to Approximate Randomization Tests with a Small Number of Clusters". The example is a replication of Munyo and Rossi (2015) which studies criminal recidivism of former prisoners by looking at the relationship between the number of inmates released from incarceration on a given day and the number of offenses committed on the same day.
+This example is from Section 4.2 of "A User's Guide to Approximate Randomization Tests with a Small Number of Clusters". It is a replication of Munyo and Rossi (2015) which studies criminal recidivism of former prisoners by looking at the relationship between the number of inmates released from incarceration on a given day and the number of offenses committed on the same day.
 
 # Make clusters
 
@@ -28,7 +28,7 @@ We start by making time based pseudo-clusters. The number of pseudo-clusters is 
 
 ```{r}
 nr <- nrow(mr2015)
-cluster_counts <- c(8,10,16)
+cluster_counts <- c(8L,10L,16L)
 
 knitr::kable(cbind(
   "# of Clusters (q)" = cluster_counts,
@@ -42,7 +42,7 @@ with the remainder thrown into the last cluster. We first generate the cluster v
 makecluster <- function(q, n)
 {
   cs <- floor(n/q); # cluster size
-  cluster <- rep(1:q, each = cs)
+  cluster <- rep(1L:q, each = cs)
   cluster <- c(cluster, rep.int(q, n-(cs*q))) # add remainder to cluster q
   cluster
 }
@@ -63,7 +63,7 @@ We start with the first specification as it is the simplest.
 
 ## Specification 1
 
-We run it once for each set of clusters.
+We run it once for 10 clusters.
 
 ```{r}
 sp1 <- formula(
@@ -71,54 +71,53 @@ sp1 <- formula(
     dayofweek + endofyear + year
 )
 
-sp1q8  <- artlm(sp1, cluster = clusters8,  data = mr2015, select = "releases")
 sp1q10 <- artlm(sp1, cluster = clusters10, data = mr2015, select = "releases")
-sp1q16 <- artlm(sp1, cluster = clusters16, data = mr2015, select = "releases")
 ```
 
-We can get the p-values using `summary`
+We can get the p-value using `summary`
 
 ```{r}
-(su11 <- summary(sp1q8))
-(su12 <- summary(sp1q10))
-(su13 <- summary(sp1q16))
+summary(sp1q10)
 ```
 
 and the confidence intervals using `confint`.
 
 ```{r}
-(ci11 <- confint(sp1q8))
-(ci12 <- confint(sp1q10))
-(ci13 <- confint(sp1q16))
+confint(sp1q10)
 ```
 
-Note that the numbers are exactly the same as in the paper for `q = 8` and `q = 10`. However, they differ slightly for `q = 16`. This is because the function uses random sampling when the number of clusters exceeds 10.
+Note that the numbers are exactly the same as in Table 4 of the paper.
 
 ## Other specifications
 
-We already stored the results from the first specification. So, we don't need to compute it again. In this section, we will just output a table of all specifications to show that the results are the same. These are the other four specifications.
+In this section, we will just output a table of all specifications to show that the results are the same. These are the specifications.
 
 ```{r}
 specifications <- list(
+  # Specification 1:
+  formula(
+    totalcrime ~ releases + temperature + rainfall + holiday + sunshine + 
+      dayofweek + endofyear + year
+  ),
   # Specification 2:
   formula(
-  totalcrime ~ releases + temperature + rainfall + holiday + sunshine + 
-    dayofweek + endofyear + index
+    totalcrime ~ releases + temperature + rainfall + holiday + sunshine + 
+      dayofweek + endofyear + index
   ),
   # Specification 3:
   formula(
-  totalcrime ~ releases + temperature + rainfall + holiday + sunshine + 
-    dayofweek + endofyear + I(12*(year - min(year)) + month)
+    totalcrime ~ releases + temperature + rainfall + holiday + sunshine + 
+      dayofweek + endofyear + I(12L * (year - min(year)) + month)
   ),
   # Specification 4:
   formula(
-  totalcrime ~ releases + temperature + rainfall + holiday + sunshine + 
-    dayofweek + endofyear + date + factor(year)*factor(month)
+    totalcrime ~ releases + temperature + rainfall + holiday + sunshine + 
+      dayofweek + endofyear + date + factor(year)*factor(month)
   ),
   # Specification 5:
   formula(
-  totalcrime ~ releases + temperature + rainfall + holiday + sunshine + 
-    dayofweek + endofyear + factor(year)*factor(month)
+    totalcrime ~ releases + temperature + rainfall + holiday + sunshine + 
+      dayofweek + endofyear + factor(year)*factor(month)
   )
 )
 ```
@@ -139,8 +138,8 @@ spregs <- list()
 # create a call with common elements
 fcall <- call("artlm", data = substitute(mr2015), select = "releases")
 
-for (si in 1:sp_num) {
-  for (ci in 1:cl_num){
+for (si in 1L:sp_num) {
+  for (ci in 1L:cl_num){
     lcall <- fcall
     lcall$formula <- specifications[[si]]
     lcall$cluster <- as.name(clnames[ci])
@@ -152,16 +151,22 @@ for (si in 1:sp_num) {
     spregs[[i]] <- eval(lcall)
     
     # name the model
-    names(spregs)[i] <- paste("s", (si+1), "c", ci, sep = "")
+    names(spregs)[i] <- paste("s", si, "c", cluster_counts[ci], sep = "")
   }
 }
 ```
 
 ```{r}
-confidence_intervals <- vapply(spregs, confint, numeric(2))
-knitr::kable(t(confidence_intervals))
+# get p-values (fourth column of summary)
+p_values <- vapply(spregs, function(z) {summary(z)$coefficients[,4L]}, 0)
+
+# get confidence intervals
+confidence_intervals <- vapply(spregs, confint, numeric(2L))
+
+knitr::kable(cbind("Pr(>|t|)" = p_values, t(confidence_intervals)))
 ```
 
+Note that the numbers are exactly the same as in Table 4 of the paper for `q = 8` and `q = 10`. However, they differ slightly for `q = 16`. This is because the function uses random sampling when the number of clusters exceeds 10.
 
 
 
