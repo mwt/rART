@@ -7,10 +7,14 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
 
-
-
-```r
+```{r setup}
 library(rART)
 set.seed(123)
 data("mr2015")
@@ -22,8 +26,7 @@ This example is from Section 4.2 of "A User's Guide to Approximate Randomization
 
 We start by making time based pseudo-clusters. The number of pseudo-clusters is at the digression of the analyst. We generate clusers according to the following table
 
-
-```r
+```{r}
 nr <- nrow(mr2015)
 cluster_counts <- c(8L,10L,16L)
 
@@ -33,18 +36,9 @@ knitr::kable(cbind(
 ))
 ```
 
-
-
-| # of Clusters (q)| Cluster Size|
-|-----------------:|------------:|
-|                 8|          328|
-|                10|          263|
-|                16|          164|
-
 with the remainder thrown into the last cluster. We first generate the cluster vectors and add them to the data frame. 
 
-
-```r
+```{r}
 makecluster <- function(q, n)
 {
   cs <- floor(n/q); # cluster size
@@ -58,7 +52,6 @@ clustercol <- vapply(cluster_counts, makecluster, numeric(nr), n = nr)
 
 # make names for the clusters
 (clnames <- paste("clusters", cluster_counts, sep = ""))
-#> [1] "clusters8"  "clusters10" "clusters16"
 
 # append data to mr2015
 mr2015[clnames] <- clustercol
@@ -72,8 +65,7 @@ We start with the first specification as it is the simplest.
 
 We run it once for 10 clusters.
 
-
-```r
+```{r}
 sp1 <- formula(
   totalcrime ~ releases + temperature + rainfall + holiday + sunshine + 
     dayofweek + endofyear + year
@@ -84,35 +76,14 @@ sp1q10 <- artlm(sp1, cluster = clusters10, data = mr2015, select = "releases")
 
 We can get the p-value using `summary`
 
-
-```r
+```{r}
 summary(sp1q10)
-#> 
-#> Call:
-#> artlm(formula = sp1, data = mr2015, cluster = clusters10, select = "releases")
-#> 
-#> Residuals:
-#>     Min      1Q  Median      3Q     Max 
-#> -94.812 -17.643  -1.092  16.265 127.886 
-#> 
-#> Coefficients:
-#>          Estimate Crit. value t value Pr(>|t|)   
-#> releases   0.2255      0.6655   1.049  0.00195 **
-#> ---
-#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#> 
-#> Residual standard error: 25.98 on 2617 degrees of freedom
-#> Multiple R-squared:  0.3702,	Adjusted R-squared:  0.3671 
-#> F-statistic: 118.3 on 13 and 2617 DF,  p-value: < 2.2e-16
 ```
 
 and the confidence intervals using `confint`.
 
-
-```r
+```{r}
 confint(sp1q10)
-#>     2.5 %    97.5 % 
-#> 0.1411774 0.6033270
 ```
 
 Note that the numbers are exactly the same as in Table 4 of the paper.
@@ -121,8 +92,7 @@ Note that the numbers are exactly the same as in Table 4 of the paper.
 
 In this section, we will just output a table of all specifications to show that the results are the same. These are the specifications.
 
-
-```r
+```{r}
 specifications <- list(
   # Specification 1:
   formula(
@@ -154,18 +124,14 @@ specifications <- list(
 
 We are going to run this many specifications and cluster numbers.
 
-
-```r
+```{r}
 (sp_num <- length(specifications))
-#> [1] 5
 (cl_num <- length(cluster_counts))
-#> [1] 3
 ```
 
 First, make a list of linear models for each specification and number of clusters.
 
-
-```r
+```{r}
 # initialize empty list
 spregs <- list()
 
@@ -190,8 +156,7 @@ for (si in 1L:sp_num) {
 }
 ```
 
-
-```r
+```{r}
 # get p-values (fourth column of summary)
 p_values <- vapply(spregs, function(z) {summary(z)$coefficients[,4L]}, 0)
 
@@ -200,26 +165,6 @@ confidence_intervals <- vapply(spregs, confint, numeric(2L))
 
 knitr::kable(cbind("Pr(>|t|)" = p_values, t(confidence_intervals)))
 ```
-
-
-
-|      | Pr(>&#124;t&#124;)|      2.5 %|    97.5 %|
-|:-----|------------------:|----------:|---------:|
-|s1c8  |          0.0078125|  0.1245417| 0.4291700|
-|s1c10 |          0.0019531|  0.1411774| 0.6033270|
-|s1c16 |          0.0021000|  0.1269717| 0.4458028|
-|s2c8  |          0.0234375|  0.0354499| 0.3906485|
-|s2c10 |          0.0136719|  0.0683580| 0.4457683|
-|s2c16 |          0.0034000|  0.0960987| 0.3621828|
-|s3c8  |          0.0234375|  0.0355031| 0.3905089|
-|s3c10 |          0.0136719|  0.0676256| 0.4579332|
-|s3c16 |          0.0047000|  0.0835512| 0.3644249|
-|s4c8  |          0.1015625| -0.0700099| 0.3972784|
-|s4c10 |          0.0625000| -0.0234798| 0.4305729|
-|s4c16 |          0.0312000|  0.0151660| 0.3251492|
-|s5c8  |          0.1015625| -0.0668794| 0.4177484|
-|s5c10 |          0.0527344| -0.0023512| 0.4519693|
-|s5c16 |          0.0141000|  0.0504298| 0.3632732|
 
 Note that the numbers are exactly the same as in Table 4 of the paper for `q = 8` and `q = 10`. However, they differ slightly for `q = 16`. This is because the function uses random sampling when the number of clusters exceeds 10.
 
