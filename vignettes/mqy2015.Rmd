@@ -20,9 +20,11 @@ set.seed(123)
 data("mqy2015")
 ```
 
-This example is from Section 4.1 of "A User's Guide to Approximate Randomization Tests with a Small Number of Clusters".
+This example is from Section 4.1 of "A User's Guide to Approximate Randomization Tests with a Small Number of Clusters". It is a replication of Meng, Qian and Yared (2015) which studies the effect of changes in the grain supply and mortality in China during the great famine.
 
 # Create dummy variables
+
+We start by making two dummy variables. The first is for the years of the famine, which spanned from 1958-1960. The second is a subset of years used in the original paper to restrict the regression.
 
 ```{r}
 # famine years
@@ -32,7 +34,39 @@ mqy2015$famine <- as.integer((mqy2015$year >= 1958) & (mqy2015$year <= 1960))
 mqy2015$a2dumm <- (mqy2015$year >= 1953) & (mqy2015$year <= 1965)
 ```
 
-# Run all six specifications
+# Regressions
+
+We start with the first specification as it is the simplest. 
+
+## Specification 1
+
+We run the first specification using the `artlm` function.
+
+```{r}
+spreg1 <- artlm(
+  ldeath_b ~ lgrain_pred:famine + lgrain_pred + lurbpop + ltotpop + year,
+  cluster = province,
+  data = mqy2015,
+  subset = mqy2015$main,
+  select = "lgrain_pred:famine"
+)
+```
+
+We can get the p-value using `summary`
+
+```{r}
+summary(spreg1)
+```
+
+and the confidence intervals using `confint`.
+
+```{r}
+confint(spreg1)
+```
+
+Note that the numbers are exactly the same as in Table 1 of the paper.
+
+## Run all six specifications
 
 ```{r}
 spregs <- list(
@@ -97,3 +131,5 @@ confidence_intervals <- vapply(spregs, confint, numeric(2L))
 
 knitr::kable(cbind("Pr(>|t|)" = p_values, t(confidence_intervals)))
 ```
+
+Which are the same values as in Table 1 of the paper.
