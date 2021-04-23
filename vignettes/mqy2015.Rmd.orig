@@ -7,10 +7,14 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
 
-
-
-```r
+```{r setup}
 library(rART)
 set.seed(123)
 data("mqy2015")
@@ -22,8 +26,7 @@ This example is from Section 4.1 of "A User's Guide to Approximate Randomization
 
 We start by making two dummy variables. The first is for the years of the famine, which spanned from 1958-1960. The second is a subset of years used in the original paper to restrict the regression.
 
-
-```r
+```{r}
 # famine years
 mqy2015$famine <- as.integer((mqy2015$year >= 1958) & (mqy2015$year <= 1960))
 
@@ -39,8 +42,7 @@ We start with the first specification as it is the simplest.
 
 We run the first specification using the `artlm` function.
 
-
-```r
+```{r}
 spreg1 <- artlm(
   ldeath_b ~ lgrain_pred:famine + lgrain_pred + lurbpop + ltotpop + year,
   cluster = province,
@@ -52,45 +54,21 @@ spreg1 <- artlm(
 
 We can get the p-value using `summary`
 
-
-```r
+```{r}
 summary(spreg1)
-#> 
-#> Call:
-#> artlm(formula = ldeath_b ~ lgrain_pred:famine + lgrain_pred + 
-#>     lurbpop + ltotpop + year, data = mqy2015, cluster = province, 
-#>     select = "lgrain_pred:famine", subset = mqy2015$main)
-#> 
-#> Residuals:
-#>      Min       1Q   Median       3Q      Max 
-#> -0.53202 -0.10850 -0.00832  0.09492  1.59861 
-#> 
-#> Coefficients:
-#>                    Estimate Crit. value t value Pr(>|t|)    
-#> lgrain_pred:famine  0.06339     0.47800   1.734   <2e-16 ***
-#> ---
-#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-#> 
-#> Residual standard error: 0.1816 on 563 degrees of freedom
-#> Multiple R-squared:  0.9414,	Adjusted R-squared:  0.9409 
-#> F-statistic:  1808 on 5 and 563 DF,  p-value: < 2.2e-16
 ```
 
 and the confidence intervals using `confint`.
 
-
-```r
+```{r}
 confint(spreg1)
-#>      2.5 %     97.5 % 
-#> 0.03114838 0.05536269
 ```
 
 Note that the numbers are exactly the same as in Table 1 of the paper.
 
 ## Run all six specifications
 
-
-```r
+```{r}
 spregs <- list(
   # Specification 1
   artlm(
@@ -144,8 +122,7 @@ spregs <- list(
 
 # Check the values
 
-
-```r
+```{r}
 # get p-values (fourth column of summary)
 p_values <- vapply(spregs, function(z) {summary(z)$coefficients[,4L]}, 0)
 
@@ -154,16 +131,5 @@ confidence_intervals <- vapply(spregs, confint, numeric(2L))
 
 knitr::kable(cbind("Pr(>|t|)" = p_values, t(confidence_intervals)))
 ```
-
-
-
-| Pr(>&#124;t&#124;)|     2.5 %|    97.5 %|
-|------------------:|---------:|---------:|
-|              0e+00| 0.0310997| 0.0552652|
-|              1e-04| 0.0187381| 0.0470521|
-|              0e+00| 0.0391091| 0.0655466|
-|              0e+00| 0.0281260| 0.0668108|
-|              0e+00| 0.0324108| 0.0575060|
-|              0e+00| 0.0288547| 0.0506377|
 
 Which are the same values as in Table 1 of the paper.
