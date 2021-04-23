@@ -1,0 +1,99 @@
+---
+title: "Meng, Qian and Yared (2015)"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Meng, Qian and Yared (2015)}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(rART)
+set.seed(123)
+data("mqy2015")
+```
+
+This example is from Section 4.1 of "A User's Guide to Approximate Randomization Tests with a Small Number of Clusters".
+
+# Create dummy variables
+
+```{r}
+# famine years
+mqy2015$famine <- as.integer((mqy2015$year >= 1958) & (mqy2015$year <= 1960))
+
+# subset of years for analysis 2, 4, and 6
+mqy2015$a2dumm <- (mqy2015$year >= 1953) & (mqy2015$year <= 1965)
+```
+
+# Run all six specifications
+
+```{r}
+spregs <- list(
+  # Specification 1
+  artlm(
+    ldeath_b ~ lgrain_pred:famine + lgrain_pred + lurbpop + ltotpop + year,
+    cluster = province,
+    data = mqy2015,
+    subset = mqy2015$main,
+    select = "lgrain_pred:famine"
+  ),
+  # Specification 2
+  artlm(
+    ldeath_b ~ lgrain_pred:famine + lgrain_pred + lurbpop + ltotpop + year,
+    cluster = province,
+    data = mqy2015,
+    subset = mqy2015$main & mqy2015$a2dumm,
+    select = "lgrain_pred:famine"
+  ),
+  # Specification 3
+  artlm(
+    ldeath_b ~ lgrain_pred:famine + lgrain_pred + lurbpop + ltotpop + year,
+    cluster = province,
+    data = mqy2015,
+    select = "lgrain_pred:famine"
+  ),
+  # Specification 4
+  artlm(
+    ldeath_b ~ lgrain_pred:famine + lgrain_pred + lurbpop + ltotpop + year,
+    cluster = province,
+    data = mqy2015,
+    subset = mqy2015$a2dumm,
+    select = "lgrain_pred:famine"
+  ),
+  # Specification 5
+  artlm(
+    ldeath_b ~ lgrain:famine + lgrain + lurbpop + ltotpop + year,
+    cluster = province,
+    data = mqy2015,
+    subset = mqy2015$main,
+    select = "lgrain:famine"
+  ),
+  # Specification 6
+  artlm(
+    ldeath_b ~ lgrain:famine + lgrain + lurbpop + ltotpop + year,
+    cluster = province,
+    data = mqy2015,
+    subset = mqy2015$main & mqy2015$a2dumm,
+    select = "lgrain:famine"
+  )
+)
+```
+
+# Check the values
+
+```{r}
+# get p-values (fourth column of summary)
+p_values <- vapply(spregs, function(z) {summary(z)$coefficients[,4L]}, 0)
+
+# get confidence intervals
+confidence_intervals <- vapply(spregs, confint, numeric(2L))
+
+knitr::kable(cbind("Pr(>|t|)" = p_values, t(confidence_intervals)))
+```
