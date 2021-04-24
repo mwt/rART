@@ -3,7 +3,7 @@
 #' A dataset that includes the universe of criminal incidents reported at the
 #' Police Department of Montevideo: more than 690,000 felonies reported in
 #' Montevideo, the capital of Uruguay, between January 1st 2004 and
-#' March 15th 2011 (2631 days).
+#' March 15th 2011 (2631 days). This data is for academic use only.
 #'
 #' @format A data frame with 2631 rows and 12 variables:
 #' \describe{
