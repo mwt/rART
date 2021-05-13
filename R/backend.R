@@ -135,7 +135,7 @@ CRS.CI <- function(c.beta, G, alpha = 0.05, nj = 1) {
   while (lo.test == 0 & ite < 10) {
     L = L - distance;
     lo.test <- CRS.bin(c.beta, G, L, alpha, nj);
-    ite = ite + 9;
+    ite = ite + 1;
     if (ite == 10) { stop("Could not find proper lower bound") }
   }
 
