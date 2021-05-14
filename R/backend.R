@@ -71,14 +71,14 @@ CRS.test <- function(c.beta, G, lambda = 0, alpha = 0.05, nj = 1) {
 #'
 #' This helper function only determines whether the test passes. It is used by [CRS.CI()].
 #'
+#' @param lambda scalar for the null hypothesis c'beta = lambda (default 0)
 #' @param c.beta vector of parameters entering the null hypothesis c'beta - with one estimator per cluster (q x 1)
 #' @param G the group of all trasformations (use random.G to get)
-#' @param lambda scalar for the null hypothesis c'beta = lambda (default 0)
 #' @param alpha significance level (dafault 0.05)
 #' @param nj q x 1 vector of sample sizes in each cluster (for alternative weighting)
 #'
 #' @return A `logical` that is true if the test rejects the null hypothesis.
-CRS.bin <- function(c.beta, G, lambda = 0, alpha = 0.05, nj = 1) {
+CRS.bin <- function(lambda, c.beta, G, alpha = 0.05, nj = 1) {
   # number of tests to run (vectorized)
   ntests = length(lambda)
   # number of clusters/estimators
@@ -131,39 +131,42 @@ CRS.bin <- function(c.beta, G, lambda = 0, alpha = 0.05, nj = 1) {
 #' @return The 1-alpha confidence interval for c'beta
 CRS.CI <- function(c.beta, G, alpha = 0.05, nj = 1) {
   if (any(is.na(c.beta))) {
-    return(
-      c(NA, NA)
-    )
+    return(c(NA, NA))
   }
-  tolerance = mean(c.beta) / 1000;
+  tolerance = mean(c.beta) / 1000
+
   #---------------------------------------------------------------
-  q = length(c.beta);
-  if (length(nj) != 1 & length(nj) != q) { nj = 1 }
+  q = length(c.beta)
+
+  if (length(nj) != 1 & length(nj) != q) {
+    nj = 1
+  }
 
   # Random variable Sn as in Algorithm 2.1 plus initial values
-  center = mean(c.beta);
-  distance = 2 * sd(c.beta);
+  center = mean(c.beta)
+
+  distance = 2 * sd(c.beta)
+
   # first element is lower and second element is upper bound
-  LU = center + (c(-1,1) * distance)
+  LU = center + (c(-1, 1) * distance)
   #---------------------------------------------------------------
   # Find lower and upper bounds that are ``rejected''
-  three.test <- CRS.bin(c.beta, G, c(LU,center), alpha);
-  lohi.test <- three.test[1L:2L]
-  center.test <- three.test[3L]
-  ite = 1;
+  lohi.test <- CRS.bin(LU, c.beta, G, alpha)
+
+  ite = 1
+
   while (any(lohi.test < 0) & ite < 10) {
     LU = LU + ((lohi.test < 0) * c(-1, 1) * distance)
-    lohi.test <- CRS.bin(c.beta, G, LU, alpha)
+    lohi.test <- CRS.bin(LU, c.beta, G, alpha)
     ite = ite + 1
     if (ite == 10) {
-      stop("Could not find proper bounds")
+      stop("Could not find proper bounds (CI too large)")
     }
   }
-  # find x intercept
+  # use Brent-Q to find the roots linearity makes this fast
   lower <-
-    center - (center.test * (LU[1L] - center) / (lohi.test[1L] - center.test))
+    uniroot(CRS.bin, c(LU[1L], center), c.beta = c.beta, G = G)
   upper <-
-    center - (center.test * (LU[2L] - center) / (lohi.test[2L] - center.test))
-
-  return(c(lower, upper))
+    uniroot(CRS.bin, c(center, LU[2L]), c.beta = c.beta, G = G)
+  return(c(lower$root, upper$root))
 }

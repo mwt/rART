@@ -4,14 +4,14 @@
 \alias{CRS.bin}
 \title{Hypothesis Test for ART}
 \usage{
-CRS.bin(c.beta, G, lambda = 0, alpha = 0.05, nj = 1)
+CRS.bin(lambda, c.beta, G, alpha = 0.05, nj = 1)
 }
 \arguments{
+\item{lambda}{scalar for the null hypothesis c'beta = lambda (default 0)}
+
 \item{c.beta}{vector of parameters entering the null hypothesis c'beta - with one estimator per cluster (q x 1)}
 
 \item{G}{the group of all trasformations (use random.G to get)}
-
-\item{lambda}{scalar for the null hypothesis c'beta = lambda (default 0)}
 
 \item{alpha}{significance level (dafault 0.05)}
 
