@@ -135,6 +135,7 @@ CRS.CI <- function(c.beta, G, alpha = 0.05, nj = 1) {
       c(NA, NA)
     )
   }
+  tolerance = mean(c.beta) / 1000;
   #---------------------------------------------------------------
   q = length(c.beta);
   if (length(nj) != 1 & length(nj) != q) { nj = 1 }
@@ -150,15 +151,19 @@ CRS.CI <- function(c.beta, G, alpha = 0.05, nj = 1) {
   lohi.test <- three.test[1L:2L]
   center.test <- three.test[3L]
   ite = 1;
-  while ( any(lohi.test < 0) & ite < 10) {
-    LU = LU + ((lohi.test < 0) * c(-1,1) * distance)
+  while (any(lohi.test < 0) & ite < 10) {
+    LU = LU + ((lohi.test < 0) * c(-1, 1) * distance)
     lohi.test <- CRS.bin(c.beta, G, LU, alpha)
     ite = ite + 1
-    if (ite == 10) { stop("Could not find proper bounds") }
+    if (ite == 10) {
+      stop("Could not find proper bounds")
+    }
   }
-  # find x intercepts
-  lower <- center - (center.test * (LU[1L] - center)/(lohi.test[1L] - center.test))
-  upper <- center - (center.test * (LU[2L] - center)/(lohi.test[2L] - center.test))
+  # find x intercept
+  lower <-
+    center - (center.test * (LU[1L] - center) / (lohi.test[1L] - center.test))
+  upper <-
+    center - (center.test * (LU[2L] - center) / (lohi.test[2L] - center.test))
 
   return(c(lower, upper))
 }
