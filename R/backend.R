@@ -151,7 +151,10 @@ CRS.CI <- function(c.beta, G, alpha = 0.05, nj = 1) {
   LU = center + (c(-1, 1) * distance)
   #---------------------------------------------------------------
   # Find lower and upper bounds that are ``rejected''
-  lohi.test <- CRS.bin(LU, c.beta, G, alpha)
+  three.tests <- CRS.bin(c(LU, center), c.beta, G, alpha)
+  lohi.test <- three.tests[1:2]
+  # We use this value at the end
+  center.test <- three.tests[3]
 
   ite = 1
 
@@ -165,8 +168,27 @@ CRS.CI <- function(c.beta, G, alpha = 0.05, nj = 1) {
   }
   # use Brent-Q to find the roots linearity makes this fast
   lower <-
-    uniroot(CRS.bin, c(LU[1L], center), c.beta = c.beta, G = G)
+    uniroot(
+      CRS.bin,
+      lower = LU[1L],
+      upper = center,
+      f.lower = lohi.test[1L],
+      f.upper = center.test,
+      c.beta = c.beta,
+      G = G,
+      tol = tolerance
+    )
   upper <-
-    uniroot(CRS.bin, c(center, LU[2L]), c.beta = c.beta, G = G)
+    uniroot(
+      CRS.bin,
+      lower = center,
+      upper = LU[2L],
+      f.lower = center.test,
+      f.upper = lohi.test[2L],
+      c.beta = c.beta,
+      G = G,
+      tol = tolerance
+    )
+  print(c(lower$iter, upper$iter))
   return(c(lower$root, upper$root))
 }
