@@ -94,13 +94,13 @@ CRS.bin <- function(c.beta, G, lambda = 0, alpha = 0.05, nj = 1) {
     beta.adj <- as.vector(c.beta) - (q_ones %*% t(lambda))
     Sn <- sqrt(q) * sqrt(nj) * beta.adj
     # observed Test stat
-    ObsT <- abs(apply(Sn, 2, mean) / apply(Sn, 2, sd))
+    ObsT <- abs(Rfast::colmeans(Sn) / Rfast::colVars(Sn, std=TRUE))
     # Compute New Test Stat over transformed data
     NewT.mean <- abs((t(Sn) %*% G)/q)
     NewT.sd <- sqrt((as.vector(t(Sn)^2 %*% q_ones) - q*NewX.mean^2)/(q-1))
     NewT <- NewT.mean/NewT.sd
-    NewT <- apply(NewT, 1, sort)
-    (ObsT > as.vector(NewT[k,]))
+    NewT <- Rfast::rowSort(NewT)
+    (ObsT > as.vector(NewT[,k]))
   } else {
     beta.adj <- c.beta - lambda
     Sn <- sqrt(q) * sqrt(nj) * beta.adj
@@ -109,7 +109,7 @@ CRS.bin <- function(c.beta, G, lambda = 0, alpha = 0.05, nj = 1) {
     # transformed data
     NewX <- G * as.vector(Sn)
     # Compute New Test Stat over transformed data
-    NewT <- abs(apply(NewX, 2, mean) / apply(NewX, 2, sd))
+    NewT <- abs(Rfast::colmeans(NewX) / Rfast::colVars(NewX, std=TRUE))
     # sort the vector of Test Stat
     NewT <- sort(NewT)
     # return test
