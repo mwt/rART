@@ -79,25 +79,42 @@ CRS.test <- function(c.beta, G, lambda = 0, alpha = 0.05, nj = 1) {
 #'
 #' @return A `logical` that is true if the test rejects the null hypothesis.
 CRS.bin <- function(c.beta, G, lambda = 0, alpha = 0.05, nj = 1) {
+  # number of tests to run (vectorized)
+  ntests = length(lambda)
+  # number of clusters/estimators
   q = length(c.beta);
-  # # Number of clusters/estimators
+  # of elements in G
   M = dim(G)[2];
-  # # of elements in G
+  # index of final test matrix
+  k = M - floor(M * alpha)
   if (length(nj) != 1 & length(nj) != q) { nj = 1 }
 
-  Sn = sqrt(q) * sqrt(nj) * (c.beta - lambda);
-
-  ObsT = abs(mean(Sn)) / sd(Sn);
-  # observed Test stat
-  NewX = G * as.vector(Sn);
-  # transformed data
-  # Compute New Test Stat over transformed data
-  NewT = abs(apply(NewX, 2, mean) / apply(NewX, 2, sd));
-  NewT = sort(NewT);
-  # sort the vector of Test Stat
-  k = M - floor(M * alpha);
-  # Non non-randomized Test
-  (ObsT > NewT[k])
+  if (ntests > 1){
+    q_ones <- rep(1, q)
+    beta.adj <- as.vector(c.beta) - (q_ones %*% t(lambda))
+    Sn <- sqrt(q) * sqrt(nj) * beta.adj
+    # observed Test stat
+    ObsT <- abs(apply(Sn, 2, mean) / apply(Sn, 2, sd))
+    # Compute New Test Stat over transformed data
+    NewT.mean <- abs((t(Sn) %*% G)/q)
+    NewT.sd <- sqrt((as.vector(t(Sn)^2 %*% q_ones) - q*NewX.mean^2)/(q-1))
+    NewT <- NewT.mean/NewT.sd
+    NewT <- apply(NewT, 1, sort)
+    (ObsT > as.vector(NewT[k,]))
+  } else {
+    beta.adj <- c.beta - lambda
+    Sn <- sqrt(q) * sqrt(nj) * beta.adj
+    # observed Test stat
+    ObsT <- abs(mean(Sn)) / sd(Sn)
+    # transformed data
+    NewX <- G * as.vector(Sn)
+    # Compute New Test Stat over transformed data
+    NewT <- abs(apply(NewX, 2, mean) / apply(NewX, 2, sd))
+    # sort the vector of Test Stat
+    NewT <- sort(NewT)
+    # return test
+    (ObsT > NewT[k])
+  }
 }
 
 #' Confidence Intervals for ART
