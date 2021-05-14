@@ -2,8 +2,8 @@ Package: rART
 Type: Package
 Title: Approximate Randomization Tests with a Small Number of Clusters
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
+Author: Ivan Canay and Matthew Wildrick Thomas
+Maintainer: Matthew Wildrick Thomas <matthew.thomas@northwestern.edu>
 Description: This package has several functions in R that are used in the paper
     "A User’s Guide to Approximate Randomization Tests with a Small Number of Clusters"
 License: MIT
@@ -12,7 +12,8 @@ LazyData: true
 ByteCompile: true
 Imports:
   car,
-  Formula
+  Formula,
+  Rfast
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
 Depends: 
