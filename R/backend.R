@@ -97,7 +97,7 @@ CRS.bin <- function(c.beta, G, lambda = 0, alpha = 0.05, nj = 1) {
     ObsT <- abs(Rfast::colmeans(Sn) / Rfast::colVars(Sn, std=TRUE))
     # Compute New Test Stat over transformed data
     NewT.mean <- abs((t(Sn) %*% G)/q)
-    NewT.sd <- sqrt((as.vector(t(Sn)^2 %*% q_ones) - q*NewX.mean^2)/(q-1))
+    NewT.sd <- sqrt((as.vector(t(Sn)^2 %*% q_ones) - q*NewT.mean^2)/(q-1))
     NewT <- NewT.mean/NewT.sd
     NewT <- Rfast::rowSort(NewT)
     (ObsT > as.vector(NewT[,k]))
