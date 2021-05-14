@@ -52,7 +52,7 @@ CRS.test <- function(c.beta, G, lambda = 0, alpha = 0.05, nj = 1) {
   NewX = G * as.vector(Sn);
   # transformed data
   # Compute New Test Stat over transformed data
-  NewT = abs(apply(NewX, 2, mean) / apply(NewX, 2, sd));
+  NewT = abs(Rfast::colmeans(NewX) / Rfast::colVars(NewX, std=TRUE))
   NewT = sort(NewT);
   # sort the vector of Test Stat
   k = M - floor(M * alpha);
@@ -189,6 +189,5 @@ CRS.CI <- function(c.beta, G, alpha = 0.05, nj = 1) {
       G = G,
       tol = tolerance
     )
-  print(c(lower$iter, upper$iter))
   return(c(lower$root, upper$root))
 }
