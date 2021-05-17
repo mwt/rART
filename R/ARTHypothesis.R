@@ -15,7 +15,7 @@
 #' @return
 #' @seealso [car::linearHypothesis()]
 #' @export
-ARTHypothesis <- function(model, hypothesis.matrix, rhs=NULL)
+ARTHypothesis <- function(model, hypothesis.matrix, rhs=NULL, nrg=10000)
 {
   b <- model$clbetas[complete.cases(model$clbetas),]
   if (is.character(hypothesis.matrix)) {
