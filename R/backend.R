@@ -9,7 +9,6 @@
 random.G <- function(q, B = 10000) {
   e <- c(1, -1)
   if (q < 11) {
-    B <- 2 ^ q
     perm <- t(expand.grid(rep(list(e), q)))
   }
   # Draw B transformations from G otherwise
@@ -47,12 +46,12 @@ CRS.test <- function(c.beta, G, lambda = 0, alpha = 0.05, nj = 1) {
 
   Sn = sqrt(q) * sqrt(nj) * (c.beta - lambda);
 
-  ObsT = abs(mean(Sn)) / sd(Sn);
+  ObsT = abs(mean(Sn));
   # observed Test stat
   NewX = G * as.vector(Sn);
   # transformed data
   # Compute New Test Stat over transformed data
-  NewT = abs(Rfast::colmeans(NewX) / Rfast::colVars(NewX, std=TRUE))
+  NewT = abs(Rfast::colmeans(NewX));
   NewT = sort(NewT);
   # sort the vector of Test Stat
   k = M - floor(M * alpha);
@@ -65,57 +64,6 @@ CRS.test <- function(c.beta, G, lambda = 0, alpha = 0.05, nj = 1) {
 
   # List of returns
   c("Crit. value" = NewT[k], "t value" = ObsT, "Pr(>|t|)" = p.value)
-}
-
-#' Hypothesis Test for ART
-#'
-#' This helper function only determines whether the test passes. It is used by [CRS.CI()].
-#'
-#' @param lambda scalar for the null hypothesis c'beta = lambda (default 0)
-#' @param c.beta vector of parameters entering the null hypothesis c'beta - with one estimator per cluster (q x 1)
-#' @param G the group of all trasformations (use random.G to get)
-#' @param alpha significance level (dafault 0.05)
-#' @param nj q x 1 vector of sample sizes in each cluster (for alternative weighting)
-#'
-#' @return A `logical` that is true if the test rejects the null hypothesis.
-CRS.bin <- function(lambda, c.beta, G, alpha = 0.05, nj = 1) {
-  # number of tests to run (vectorized)
-  ntests = length(lambda)
-  # number of clusters/estimators
-  q = length(c.beta);
-  # of elements in G
-  M = dim(G)[2];
-  # index of final test matrix
-  k = M - floor(M * alpha)
-  if (length(nj) != 1 & length(nj) != q) { nj = 1 }
-
-  if (ntests > 1){
-    q_ones <- rep(1, q)
-    beta.adj <- as.vector(c.beta) - (q_ones %*% t(lambda))
-    Sn <- sqrt(q) * sqrt(nj) * beta.adj
-    # observed Test stat
-    ObsT <- abs(Rfast::colmeans(Sn) / Rfast::colVars(Sn, std=TRUE))
-    # Compute New Test Stat over transformed data
-    NewT.mean <- abs((t(Sn) %*% G)/q)
-    NewT.sd <- sqrt((as.vector(t(Sn)^2 %*% q_ones) - q*NewT.mean^2)/(q-1))
-    NewT <- NewT.mean/NewT.sd
-    NewT <- Rfast::rowSort(NewT)
-    # return test
-    (ObsT - as.vector(NewT[,k]))
-  } else {
-    beta.adj <- c.beta - lambda
-    Sn <- sqrt(q) * sqrt(nj) * beta.adj
-    # observed Test stat
-    ObsT <- abs(mean(Sn)) / sd(Sn)
-    # transformed data
-    NewX <- G * as.vector(Sn)
-    # Compute New Test Stat over transformed data
-    NewT <- abs(Rfast::colmeans(NewX) / Rfast::colVars(NewX, std=TRUE))
-    # sort the vector of Test Stat
-    NewT <- sort(NewT)
-    # return test
-    (ObsT - NewT[k])
-  }
 }
 
 #' Confidence Intervals for ART
@@ -137,57 +85,70 @@ CRS.CI <- function(c.beta, G, alpha = 0.05, nj = 1) {
 
   #---------------------------------------------------------------
   q = length(c.beta)
+  M = dim(G)[2];
 
-  if (length(nj) != 1 & length(nj) != q) {
-    nj = 1
+  if (length(nj) != 1 & length(nj) != q) { nj = 1 }
+
+  Sn = sqrt(nj) * c.beta
+
+  # store a(iota) from paper
+  ai = mean(sqrt(nj))
+  # store a(g) from paper
+  ag = Rfast::colmeans(sqrt(nj)*G)
+  # store b(iota) from paper
+  bi = mean(Sn)
+  # store b(g) from paper
+  bg = Rfast::colmeans(Sn*G)
+
+  # store lambda0 from paper
+  l0 = bi/ai
+
+  # calculate every possible term for every g
+
+  ll = rep(-Inf, M)
+  lu = rep( Inf, M)
+
+  # deal with the cases where ag is zero
+  zeroset = (ag == 0)
+  if (any(zeroset)) {
+    dist = abs(bg) / ai
+    ll[zeroset] = l0 - dist[zeroset]
+    lu[zeroset] = l0 + dist[zeroset]
   }
 
-  # Random variable Sn as in Algorithm 2.1 plus initial values
-  center = mean(c.beta)
+  # we exclude the -Inf and Inf cases
+  nanset  = (abs(ag) == ai)
 
-  distance = 2 * sd(c.beta)
+  # deal with the "normal" cases
+  maincase = !zeroset & !nanset
+  if (any(maincase)) {
+    # subset to get rid of points where ag is zero
 
-  # first element is lower and second element is upper bound
-  LU = center + (c(-1, 1) * distance)
-  #---------------------------------------------------------------
-  # Find lower and upper bounds that are ``rejected''
-  three.tests <- CRS.bin(c(LU, center), c.beta, G, alpha)
-  lohi.test <- three.tests[1:2]
-  # We use this value at the end
-  center.test <- three.tests[3]
+    agnz = ag[maincase]
+    bgnz = bg[maincase]
 
-  ite = 1
+    # make the ll/luterm with addition
+    addterm = l0 * (ai / (ai + abs(agnz))) +
+      (bgnz/agnz) * (abs(agnz) / (ai + abs(agnz)))
 
-  while (any(lohi.test < 0) & ite < 10) {
-    LU = LU + ((lohi.test < 0) * c(-1, 1) * distance)
-    lohi.test <- CRS.bin(LU, c.beta, G, alpha)
-    ite = ite + 1
-    if (ite == 10) {
-      stop("Could not find proper bounds (CI too large)")
-    }
+    # make the ll/lu term with subtraction
+    subterm = l0 * (ai / (ai - abs(agnz))) -
+      (bgnz/agnz) * (abs(agnz) / (ai - abs(agnz)))
+
+    # condition for ratio less than l0
+    ratless = (bgnz/agnz <= l0)
+
+    # follow the function definition
+    ll[maincase][ratless] = addterm[ratless]
+    lu[maincase][ratless] = subterm[ratless]
+
+    # follow the function definition
+    ll[maincase][!ratless] = subterm[!ratless]
+    lu[maincase][!ratless] = addterm[!ratless]
   }
-  # use Brent-Q to find the roots linearity makes this fast
-  lower <-
-    uniroot(
-      CRS.bin,
-      lower = LU[1L],
-      upper = center,
-      f.lower = lohi.test[1L],
-      f.upper = center.test,
-      c.beta = c.beta,
-      G = G,
-      tol = tolerance
-    )
-  upper <-
-    uniroot(
-      CRS.bin,
-      lower = center,
-      upper = LU[2L],
-      f.lower = center.test,
-      f.upper = lohi.test[2L],
-      c.beta = c.beta,
-      G = G,
-      tol = tolerance
-    )
-  return(c(lower$root, upper$root))
+
+  lb = quantile(ll, alpha, type = 1)
+  ub = -quantile(-lu, alpha, type = 1)
+
+  return(c(lb, ub))
 }
