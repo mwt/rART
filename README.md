@@ -1,11 +1,26 @@
 # rART
 
-The `rART` package provides functions for Approximate Randomization Tests with a Small Number of Clusters introduced in "Randomization tests under an approximate symmetry assumption" (Canay et al. 2017) and further described in "A User's Guide to Approximate Randomization Tests with a Small Number of Clusters" (Cai et al. 2021).
+The `rART` package provides functions for Approximate Randomization
+Tests with a Small Number of Clusters introduced in “Randomization tests
+under an approximate symmetry assumption” (Canay et al. 2017) and
+further described in “A User’s Guide to Approximate Randomization Tests
+with a Small Number of Clusters” (Cai et al. 2021).
 
-The package is centered around a single function `artlm` which runs the main regression. Several companion functions are provided in order to use the method. In order to demonstrate this, we generate some data.
+# Installation
 
+You can install rART using the following command:
 
-```r
+``` r
+devtools::install_github("mwt/rART")
+```
+
+# Example
+
+The package is centered around a single function `artlm` which runs the
+main regression. Several companion functions are provided in order to
+use the method. In order to demonstrate this, we generate some data.
+
+``` r
 cn <- 100 # cluster size
 nc <- 10   # number of clusters
 
@@ -36,10 +51,10 @@ head(df)
 
 # Regression
 
-The linear ART regression is `artlm`. It is exactly the same as `lm`. However, it requires a cluster variable or vector to be specified. 
+The linear ART regression is `artlm`. It is exactly the same as `lm`.
+However, it requires a cluster variable or vector to be specified.
 
-
-```r
+``` r
 (artlm1 <- artlm(y ~ x1 + x2, cluster=group, data=df))
 #> 
 #> Call:
@@ -50,24 +65,26 @@ The linear ART regression is `artlm`. It is exactly the same as `lm`. However, i
 #>     2.51695     10.02792      0.03328
 ```
 
-It supports all the features that `lm` supports. For example, you can add fixed effects. 
+It supports all the features that `lm` supports. For example, you can
+add fixed effects.
 
-
-```r
+``` r
 (artlm2 <- artlm(y ~ x1 + x2 + group - 1, cluster=group, data=df))
 #> 
 #> Call:
 #> artlm(formula = y ~ x1 + x2 + group - 1, data = df, cluster = group)
 #> 
 #> Coefficients:
-#>       x1        x2    group1    group2    group3    group4    group5    group6    group7    group8    group9   group10  
-#> 10.02793   0.03229   2.58429   2.53483   2.43459   2.43422   2.51628   2.59488   2.36401   2.55289   2.53291   2.62133
+#>       x1        x2    group1    group2    group3    group4    group5    group6  
+#> 10.02793   0.03229   2.58429   2.53483   2.43459   2.43422   2.51628   2.59488  
+#>   group7    group8    group9   group10  
+#>  2.36401   2.55289   2.53291   2.62133
 ```
 
-You can also specify that you are only interested in a subset of the variables. For example, suppose I am only interested in `x1`. 
+You can also specify that you are only interested in a subset of the
+variables. For example, suppose I am only interested in `x1`.
 
-
-```r
+``` r
 (artlm3 <- artlm(y ~ x1 + x2 + group - 1, cluster=group, select = "x1", data=df))
 #> 
 #> Call:
@@ -75,18 +92,24 @@ You can also specify that you are only interested in a subset of the variables. 
 #>     select = "x1")
 #> 
 #> Coefficients:
-#>       x1        x2    group1    group2    group3    group4    group5    group6    group7    group8    group9   group10  
-#> 10.02793   0.03229   2.58429   2.53483   2.43459   2.43422   2.51628   2.59488   2.36401   2.55289   2.53291   2.62133
+#>       x1        x2    group1    group2    group3    group4    group5    group6  
+#> 10.02793   0.03229   2.58429   2.53483   2.43459   2.43422   2.51628   2.59488  
+#>   group7    group8    group9   group10  
+#>  2.36401   2.55289   2.53291   2.62133
 ```
 
-Including the `select` option allows you to choose the parameters you are interested in. The result will not display in the regression object itself. However, chosen variables will not de displayed in `summary` etc.
+Including the `select` option allows you to choose the parameters you
+are interested in. The result will not display in the regression object
+itself. However, chosen variables will not de displayed in `summary`
+etc.
 
 # Summarizing models
 
-You can run the simplest form of ART by running `summary` on any regression object. For example, we can apply it to our weighted fixed effects regression.
+You can run the simplest form of ART by running `summary` on any
+regression object. For example, we can apply it to our weighted fixed
+effects regression.
 
-
-```r
+``` r
 summary(artlm2)
 #> 
 #> Call:
@@ -98,22 +121,25 @@ summary(artlm2)
 #> 
 #> Coefficients:
 #>    Estimate Crit. value t value Pr(>|t|)   
-#> x1 10.02793     0.71236 196.106  0.00195 **
-#> x2  0.03229     0.71394   0.658  0.07031 . 
+#> x1 10.02793    19.03458  31.700  0.00195 **
+#> x2  0.03229     0.11896   0.113  0.07031 . 
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #> 
 #> Residual standard error: 0.504 on 988 degrees of freedom
-#> Multiple R-squared:  0.9994,	Adjusted R-squared:  0.9994 
+#> Multiple R-squared:  0.9994, Adjusted R-squared:  0.9994 
 #> F-statistic: 1.332e+05 on 12 and 988 DF,  p-value: < 2.2e-16
 ```
 
-This gives us the OLS estimates, the t-statistic, the p-value, and the critical value of the t-test for 95\% confidence.
+This gives us the OLS estimates, the t-statistic, the p-value, and the
+critical value of the t-test for 95% confidence.
 
-If we summarize the regression where we selected to view only `x1`, then we will only see this one variable in the summary. Note that no selection is required to ignore the group fixed effects because ART cannot be applied to these coefficients.
+If we summarize the regression where we selected to view only `x1`, then
+we will only see this one variable in the summary. Note that no
+selection is required to ignore the group fixed effects because ART
+cannot be applied to these coefficients.
 
-
-```r
+``` r
 summary(artlm3)
 #> 
 #> Call:
@@ -126,12 +152,12 @@ summary(artlm3)
 #> 
 #> Coefficients:
 #>    Estimate Crit. value t value Pr(>|t|)   
-#> x1  10.0279      0.7124   196.1  0.00195 **
+#> x1    10.03       19.03    31.7  0.00195 **
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #> 
 #> Residual standard error: 0.504 on 988 degrees of freedom
-#> Multiple R-squared:  0.9994,	Adjusted R-squared:  0.9994 
+#> Multiple R-squared:  0.9994, Adjusted R-squared:  0.9994 
 #> F-statistic: 1.332e+05 on 12 and 988 DF,  p-value: < 2.2e-16
 ```
 
@@ -139,48 +165,49 @@ summary(artlm3)
 
 Confidence intervals are computed using the `confint` command as usual.
 
-
-```r
+``` r
 confint(artlm2)
-#>           2.5 %     97.5 %
-#> x1  9.992375525 10.0690510
-#> x2 -0.003316027  0.0752652
+#>           2.5 %      97.5 %
+#> x1  9.987563195 10.06423501
+#> x2 -0.003333396  0.07527805
 ```
 
 You can adjust the level of significance using the `level` parameter.
 
-
-```r
+``` r
 confint(artlm2, level = 0.98)
 #>            1 %        99 %
-#> x1  9.97959628 10.06905101
-#> x2 -0.01448144  0.08521353
+#> x1  9.97521696 10.07359180
+#> x2 -0.01446102  0.08521455
 ```
 
-The command will only display selected variables. So, if we use `artlm3` where we selected only `x1`, then we will only see the confidence interval for this one term. More importantly, the function will not compute intervals for unselected parameters.
+The command will only display selected variables. So, if we use `artlm3`
+where we selected only `x1`, then we will only see the confidence
+interval for this one term. More importantly, the function will not
+compute intervals for unselected parameters.
 
-
-```r
+``` r
 confint(artlm3)
 #>     2.5 %    97.5 % 
-#>  9.992376 10.069051
+#>  9.987563 10.064235
 ```
 
-It is also possible to select variables in `confint` instead of in the regression.
+It is also possible to select variables in `confint` instead of in the
+regression.
 
-
-```r
+``` r
 confint(artlm2, parm = "x2")
 #>        2.5 %       97.5 % 
-#> -0.003316027  0.075265196
+#> -0.003333396  0.075278053
 ```
 
 # Linear tests
 
-You can conduct arbitrary linear tests using `ARTHypothesis`. For example, suppose I wanted to test to see if $\beta_1 = \beta_2$. Then, I can run.
+You can conduct arbitrary linear tests using `ARTHypothesis`. For
+example, suppose I wanted to test to see if
+*β*<sub>1</sub> = *β*<sub>2</sub>. Then, I can run.
 
-
-```r
+``` r
 ARTHypothesis(artlm2, "x1 = x2")
 #> Linear ART hypothesis test
 #> 
@@ -188,15 +215,15 @@ ARTHypothesis(artlm2, "x1 = x2")
 #> x1 - x2 = 0
 #> 
 #>   Crit. value t value Pr(>|t|)   
-#> 1     0.71342  96.966 0.001953 **
+#> 1      18.986  31.587 0.001953 **
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
-You can also supply the constraint vector and constant value manually like so.
+You can also supply the constraint vector and constant value manually
+like so.
 
-
-```r
+``` r
 ARTHypothesis(artlm2, c(1,-1), 0)
 #> Linear ART hypothesis test
 #> 
@@ -204,9 +231,10 @@ ARTHypothesis(artlm2, c(1,-1), 0)
 #> x1 - x2 = 0
 #> 
 #>   Crit. value t value Pr(>|t|)   
-#> 1     0.71342  96.966 0.001953 **
+#> 1      18.986  31.587 0.001953 **
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
 
-You cannot construct a linear test using a parameter that was not selected in the original regression.
+You cannot construct a linear test using a parameter that was not
+selected in the original regression.
