@@ -20,5 +20,5 @@ CRS.CI(c.beta, G, alpha = 0.05, nj = 1)
 The 1-alpha confidence interval for c'beta
 }
 \description{
-This helper function computes confidence intervals by test inversion using bisection.
+This helper function computes confidence intervals by test inversion using linearity.
 }
