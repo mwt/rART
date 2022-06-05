@@ -22,7 +22,7 @@ set.seed(123)
 library(rART)
 ```
 
-The `rART` package provides functions for Approximate Randomization Tests with a Small Number of Clusters introduced in "Randomization tests under an approximate symmetry assumption" (Canay et al. 2017) and further described in "A User's Guide to Approximate Randomization Tests with a Small Number of Clusters" (Cai et al. 2021).
+The `rART` package provides functions for Approximate Randomization Tests with a Small Number of Clusters introduced in "Randomization tests under an approximate symmetry assumption" (Canay et al. 2017) and further described in "A User's Guide to Approximate Randomization Tests with a Small Number of Clusters" (Cai et al. 2022).
 
 The package is centered around a single function `artlm` which runs the main regression. Several companion functions are provided in order to use the method. In order to demonstrate this, we generate some data.
 

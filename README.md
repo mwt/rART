@@ -4,7 +4,7 @@ The `rART` package provides functions for Approximate Randomization
 Tests with a Small Number of Clusters introduced in “Randomization tests
 under an approximate symmetry assumption” (Canay et al. 2017) and
 further described in “A User’s Guide to Approximate Randomization Tests
-with a Small Number of Clusters” (Cai et al. 2021).
+with a Small Number of Clusters” (Cai et al. 2022).
 
 # Installation
 
